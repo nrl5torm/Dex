@@ -8,10 +8,10 @@
 import CoreData
 
 struct PersistenceController {
-    static let shared = PersistenceController()
+    static let shared = PersistenceController() // controls the "database"
 
     @MainActor
-    static let preview: PersistenceController = {
+    static let preview: PersistenceController = { // the sample preview database
         let result = PersistenceController(inMemory: true)
         let viewContext = result.container.viewContext
         for _ in 0..<10 {
@@ -29,7 +29,7 @@ struct PersistenceController {
         return result
     }()
 
-    let container: NSPersistentContainer
+    let container: NSPersistentContainer // the "database"
 
     init(inMemory: Bool = false) {
         container = NSPersistentContainer(name: "Dex")
