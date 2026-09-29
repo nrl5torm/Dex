@@ -15,6 +15,9 @@ struct MainView: View {
     @FetchRequest<Pokemon>(
         sortDescriptors: [SortDescriptor(\.id)],
         animation: .default
+    ) private var selection
+    
+    @FetchRequest<Pokemon>(sortDescriptors: []
     ) private var pokedex
     
     @State private var searchText = ""
@@ -41,6 +44,7 @@ struct MainView: View {
     
     var body: some View {
         if pokedex.isEmpty {
+            
             ContentUnavailableView {
                 Label("No Pokémons", image: .nopokemon)
             } description: {
@@ -51,12 +55,13 @@ struct MainView: View {
                 }
                 .buttonStyle(.borderedProminent)
             }
-        } else {
             
+        } else {
+    
             NavigationStack {
                 List {
                     Section() {
-                        ForEach(pokedex) { pokemon in
+                        ForEach(selection) { pokemon in
                             NavigationLink(value: pokemon) {
                                 AsyncImage(url: pokemon.sprite) { image in
                                     image
@@ -91,6 +96,17 @@ struct MainView: View {
                                     }
                                 }
                             }
+                            .swipeActions(edge: .leading) {
+                                Button(pokemon.favorite ? "Unfavorite" : "Favorite", systemImage: "star") {
+                                    pokemon.favorite.toggle()
+                                    do {
+                                        try viewContext.save()
+                                    } catch {
+                                        print(error)
+                                    }
+                                }
+                                .tint(pokemon.favorite ? .gray : .yellow)
+                            }
                         }
                     } footer: {
                         if pokedex.count < 151 {
@@ -100,7 +116,7 @@ struct MainView: View {
                                 Text("The fetch was interrupted!\n Fetch the rest of the Pokémons:")
                             } actions: {
                                 Button("Fetch Pokémons", systemImage: "arrow.down.circle") {
-                                    getPokemons(from: pokedex.count + 1)
+                                    getPokemons(from: selection.count + 1)
                                 }
                                 .buttonStyle(.borderedProminent)
                             }
@@ -134,13 +150,13 @@ struct MainView: View {
                 }
             }
             .task {
-//                getPokemons()
+                getPokemons(from: 1)
             }
         }
     }
     
     private func updateFilter() {
-        pokedex.nsPredicate = dynamicPredicate
+        selection.nsPredicate = dynamicPredicate
     }
     
     private func getPokemons(from startId: Int) {
