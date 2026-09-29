@@ -102,12 +102,10 @@ struct MainView: View {
                     }
                     .tint(.yellow)
                 }
-                ToolbarItem {
-                    Button("Add", systemImage: "plus") {
-                        getPokemons()
-                    }
-                }
             }
+        }
+        .task {
+            getPokemons()
         }
     }
     
