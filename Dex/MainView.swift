@@ -9,15 +9,35 @@ import SwiftUI
 import CoreData
 
 struct MainView: View {
-    @Environment(\EnvironmentValues.managedObjectContext)
-    private var viewContext
+    @Environment(\EnvironmentValues.managedObjectContext
+    ) private var viewContext
     
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Pokemon.id, ascending: true)],
-        animation: .default)
-    private var pokedex: FetchedResults<Pokemon>
+    @FetchRequest<Pokemon>(
+        sortDescriptors: [SortDescriptor(\.id)],
+        animation: .default
+    ) private var pokedex
+    
+    @State private var searchText = ""
+    @State private var filterByFavorites = false
     
     private let fetcher = Fetcher()
+    
+    private var dynamicPredicate: NSPredicate {
+        var predicates: [NSPredicate] = []
+        
+        if !searchText.isEmpty {
+            let nameContains = NSPredicate(format: "name contains[c] %@", searchText)
+            let idContains = NSPredicate(format: "id contains %@", searchText)
+            predicates.append(
+                NSCompoundPredicate(orPredicateWithSubpredicates: [nameContains, idContains]))
+        }
+        
+        if filterByFavorites {
+            predicates.append(NSPredicate(format: "favorite == %d", true))
+        }
+        
+        return NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
+    }
     
     var body: some View {
         NavigationStack {
@@ -34,9 +54,15 @@ struct MainView: View {
                         .frame(width: 100, height: 100)
                         
                         VStack(alignment: .leading) {
-                            Text(pokemon.name!.capitalized)
-                                .fontWeight(.bold)
-                            
+                            HStack {
+                                Text(pokemon.name!.capitalized)
+                                    .fontWeight(.bold)
+                                
+                                if pokemon.favorite {
+                                    Image(systemName: "star.fill")
+                                        .foregroundStyle(.yellow)
+                                }
+                            }
                             HStack {
                                 ForEach(pokemon.types!, id: \.self) { type in
                                     Text(type.capitalized)
@@ -47,32 +73,49 @@ struct MainView: View {
                                         .padding(.vertical, 5)
                                         .background(Color(type.capitalized))
                                         .clipShape(.capsule)
-                                        
                                 }
                             }
                         }
                     }
                 }
             }
+            .navigationTitle("Pokedex")
+            .searchable(text: $searchText, prompt: "Find a Pokémon")
+            .onChange(of: searchText, {
+                updateFilter()
+            })
+            .onChange(of: filterByFavorites, {
+                updateFilter()
+            })
             .navigationDestination(for: Pokemon.self,
                                    destination: { pokemon in
-                Text("\(pokemon.name ?? "no name"): HP \(pokemon.hp)")
+                Text("\(pokemon.id). \(pokemon.name ?? "no name"): HP \(pokemon.hp)")
 
             })
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
+                    Button {
+                        filterByFavorites.toggle()
+                    } label: {
+                        Label("Show only favorites",
+                              systemImage: filterByFavorites ? "star.fill" : "star")
+                    }
+                    .tint(.yellow)
                 }
                 ToolbarItem {
                     Button("Add", systemImage: "plus") {
-                        getPokemon()
+                        getPokemons()
                     }
                 }
             }
         }
     }
     
-    private func getPokemon() {
+    private func updateFilter() {
+        pokedex.nsPredicate = dynamicPredicate
+    }
+    
+    private func getPokemons() {
         Task {
             for id in 1...151 {
                 do {
