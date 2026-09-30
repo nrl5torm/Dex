@@ -132,11 +132,10 @@ struct MainView: View {
                 .onChange(of: filterByFavorites, {
                     updateFilter()
                 })
-                .navigationDestination(for: Pokemon.self,
-                                       destination: { pokemon in
-                    Text("\(pokemon.id). \(pokemon.name ?? "no name"): HP \(pokemon.hp)")
-                    
-                })
+                .navigationDestination(for: Pokemon.self) { pokemon in
+                    PokemonDetailView()
+                        .environmentObject(pokemon)
+                }
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button {

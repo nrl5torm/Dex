@@ -7,13 +7,24 @@
 
 import CoreData
 
+/// Controls the persistence storage (database)
 struct PersistenceController {
-    static let shared = PersistenceController() // controls the "database"
+    static let shared = PersistenceController()
 
-    @MainActor
-    static let preview: PersistenceController = { // the sample preview database
-        let result = PersistenceController(inMemory: true)
-        let viewContext = result.container.viewContext
+    static var previewPokemon: Pokemon {
+        let context = PersistenceController.preview.container.viewContext
+        
+        let fetchRequest = Pokemon.fetchRequest()
+        fetchRequest.fetchLimit = 1
+        
+        let results = try! context.fetch(fetchRequest)
+        return results.first!
+    }
+    
+    /// The sample in-memory database for previews
+    static let preview: PersistenceController = {
+        let controller = PersistenceController(inMemory: true)
+        let viewContext = controller.container.viewContext
         
         let pokemon = Pokemon(context: viewContext)
         pokemon.id = 1
@@ -32,10 +43,8 @@ struct PersistenceController {
             try viewContext.save()
         } catch {
             print(error)
-//            let nsError = error as NSError
-//            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
         }
-        return result
+        return controller
     }()
 
     let container: NSPersistentContainer // the "database"
@@ -48,16 +57,6 @@ struct PersistenceController {
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
                 print(error)
-
-                /*
-                 Typical reasons for an error here include:
-                 * The parent directory does not exist, cannot be created, or disallows writing.
-                 * The persistent store is not accessible, due to permissions or data protection when the device is locked.
-                 * The device is out of space.
-                 * The store could not be migrated to the current model version.
-                 Check the error message to determine what the actual problem was.
-                 */
-//                fatalError("Unresolved error \(error), \(error.userInfo)")
             }
         })
         container.viewContext.mergePolicy = NSMergePolicy.mergeByPropertyStoreTrump
