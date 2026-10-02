@@ -66,7 +66,18 @@ struct PokemonDetailView: View {
                         .tint(.yellow)
                 }
             }
-            .padding()
+            .padding(.horizontal)
+            .padding(.vertical, 5)
+            
+            VStack(alignment: .leading) {
+                Text("Stats:")
+                    .font(.title)
+                    .padding(.bottom, -7)
+                
+                StatsView(pokemon: pokemon)
+            }
+            .padding(.horizontal)
+            .padding(.bottom)
         }
         .navigationTitle("#\(pokemon.id) \(pokemon.name!.capitalized)")
     }
