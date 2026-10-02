@@ -24,7 +24,7 @@ struct PokemonDetailView: View {
                     .resizable()
                     .scaledToFit()
                 
-                AsyncImage(url: pokemon.sprite) { image in
+                AsyncImage(url: showShiny ? pokemon.shiny : pokemon.sprite) { image in
                     image
                         .interpolation(.none)
                         .resizable()
@@ -66,8 +66,8 @@ struct PokemonDetailView: View {
                         .tint(.yellow)
                 }
             }
+            .padding(.vertical, 10)
             .padding(.horizontal)
-            .padding(.vertical, 5)
             
             VStack(alignment: .leading) {
                 Text("Stats:")
@@ -80,6 +80,16 @@ struct PokemonDetailView: View {
             .padding(.bottom)
         }
         .navigationTitle("#\(pokemon.id) \(pokemon.name!.capitalized)")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showShiny.toggle()
+                } label: {
+                    Image(systemName: "wand.and.stars")
+                }
+                .tint(showShiny ? .yellow : .primary)
+            }
+        }
     }
 }
 

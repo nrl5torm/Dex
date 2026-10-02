@@ -19,9 +19,11 @@ struct MainView: View {
     
     @FetchRequest<Pokemon>(sortDescriptors: []
     ) private var pokedex
+    let NbPokemons = 151
     
     @State private var searchText = ""
     @State private var filterByFavorites = false
+    @State private var fetching = false
     
     private let fetcher = Fetcher()
     
@@ -31,6 +33,7 @@ struct MainView: View {
         if !searchText.isEmpty {
             let nameContains = NSPredicate(format: "name contains[c] %@", searchText)
             let idContains = NSPredicate(format: "id contains %@", searchText)
+
             predicates.append(
                 NSCompoundPredicate(orPredicateWithSubpredicates: [nameContains, idContains]))
         }
@@ -48,9 +51,9 @@ struct MainView: View {
             ContentUnavailableView {
                 Label("No Pokémons", image: .nopokemon)
             } description: {
-                Text("There aren't any Pokémon yet.\n Fetch them to get started:")
+                Text("There aren't any Pokémons yet.\n Fetch them to get started:")
             } actions: {
-                Button("Fetch Pokémons", systemImage: "antenna.radiowaves.left.and.right") {
+                Button("Fetch Pokémons", systemImage: "arrow.down.circle") {
                     getPokemons(from: 1)
                 }
                 .buttonStyle(.borderedProminent)
@@ -110,7 +113,16 @@ struct MainView: View {
                             }
                         }
                     } footer: {
-                        if pokedex.count < 151 {
+                        if fetching {
+                            HStack() {
+                                Spacer()
+                                ProgressView()
+                                    .scaleEffect(4)
+                                Spacer()
+                            }
+                            .padding()
+                            
+                        } else if pokedex.count < NbPokemons {
                             ContentUnavailableView {
                                 Label("Missing Pokémons", image: .nopokemon)
                             } description: {
@@ -125,7 +137,7 @@ struct MainView: View {
                         }
                     }
                 }
-                .navigationTitle("Pokedex")
+                .navigationTitle("Pokédex")
                 .searchable(text: $searchText, prompt: "Find a Pokémon")
                 .onChange(of: searchText, {
                     updateFilter()
@@ -149,9 +161,6 @@ struct MainView: View {
                     }
                 }
             }
-            .task {
-                getPokemons(from: 1)
-            }
         }
     }
     
@@ -160,10 +169,13 @@ struct MainView: View {
     }
     
     private func getPokemons(from startId: Int) {
+        fetching = true
+        
         Task {
-            for id in startId...151 {
+            for id in startId...NbPokemons {
                 do {
                     let fetched = try await fetcher.fetchPokemon(id: id)
+//                    try await Task.sleep(for: .seconds(1))
                     
                     let pokemon = Pokemon(context: viewContext)
                     pokemon.id = fetched.id
@@ -183,6 +195,8 @@ struct MainView: View {
                     print(error)
                 }
             }
+            
+            fetching = false
         }
     }
 }

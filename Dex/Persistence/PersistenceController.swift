@@ -11,6 +11,7 @@ import CoreData
 struct PersistenceController {
     static let shared = PersistenceController()
 
+    /// A sample pokemon for previews
     static var previewPokemon: Pokemon {
         let context = PersistenceController.preview.container.viewContext
         
@@ -21,7 +22,7 @@ struct PersistenceController {
         return results.first!
     }
     
-    /// The sample in-memory database for previews
+    /// The sample (in-memory) database for previews
     static let preview: PersistenceController = {
         let controller = PersistenceController(inMemory: true)
         let viewContext = controller.container.viewContext
@@ -44,21 +45,25 @@ struct PersistenceController {
         } catch {
             print(error)
         }
+        
         return controller
     }()
 
-    let container: NSPersistentContainer // the "database"
+    /// The container for the database (can be in-memory or on persistent storage)
+    let container: NSPersistentContainer
 
     init(inMemory: Bool = false) {
         container = NSPersistentContainer(name: "Dex")
         if inMemory {
             container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
         }
-        container.loadPersistentStores(completionHandler: { (storeDescription, error) in
+        
+        container.loadPersistentStores(completionHandler: { storeDescription, error in
             if let error = error as NSError? {
                 print(error)
             }
         })
+        
         container.viewContext.mergePolicy = NSMergePolicy.mergeByPropertyStoreTrump
         container.viewContext.automaticallyMergesChangesFromParent = true
     }

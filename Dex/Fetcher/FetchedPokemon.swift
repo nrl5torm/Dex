@@ -75,6 +75,10 @@ struct FetchedPokemon: Decodable {
             decodedTypes.append(type)
         }
         
+        if decodedTypes.count > 1 && (decodedTypes[0] == "normal" || decodedTypes[1] == "ice") {
+            decodedTypes.swapAt(0, 1)
+        }
+        
         types = decodedTypes
         
         var decodedStats: [Stats: Int16] = [:]
