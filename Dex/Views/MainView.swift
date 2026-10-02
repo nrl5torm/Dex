@@ -88,6 +88,7 @@ struct MainView: View {
                                                 .font(.subheadline)
                                                 .fontWeight(.semibold)
                                                 .foregroundStyle(.black)
+                                                .shadow(color: .white, radius: 1)
                                                 .padding(.horizontal, 13)
                                                 .padding(.vertical, 5)
                                                 .background(Color(type.capitalized))
