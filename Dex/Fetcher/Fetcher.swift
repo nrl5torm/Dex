@@ -26,7 +26,6 @@ struct Fetcher {
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         
         let pokemon = try decoder.decode(FetchedPokemon.self, from: data)
-        print("Fetched pokemon: \(pokemon.id) - \(pokemon.name.capitalized)")
         
         return pokemon
     }

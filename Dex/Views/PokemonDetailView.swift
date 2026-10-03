@@ -24,12 +24,12 @@ struct PokemonDetailView: View {
                     .resizable()
                     .scaledToFit()
                 
-                AsyncImage(url: showShiny ? pokemon.shiny : pokemon.sprite) { image in
+                AsyncImage(url: showShiny ? pokemon.shinyURL : pokemon.spriteURL) { image in
                     image
                         .interpolation(.none)
                         .resizable()
                         .scaledToFit()
-                        .padding(.top, 100)
+                        .padding(.top, 180)
                         .padding(.horizontal, 40)
                         .shadow(color: .black, radius: 6)
                 } placeholder: {
