@@ -24,17 +24,27 @@ struct PokemonDetailView: View {
                     .resizable()
                     .scaledToFit()
                 
-                AsyncImage(url: showShiny ? pokemon.shinyURL : pokemon.spriteURL) { image in
-                    image
+                if pokemon.sprite == nil || pokemon.shiny == nil {
+                    AsyncImage(url: showShiny ? pokemon.shinyURL : pokemon.spriteURL) { image in
+                        image
+                            .interpolation(.none)
+                            .resizable()
+                            .scaledToFit()
+                            .padding(.top, 180)
+                            .padding(.horizontal, 40)
+                            .shadow(color: .black, radius: 6)
+                    } placeholder: {
+                        ProgressView()
+                            .scaleEffect(8)
+                    }
+                } else {
+                    (showShiny ? pokemon.shinyView : pokemon.spriteView)
                         .interpolation(.none)
                         .resizable()
                         .scaledToFit()
                         .padding(.top, 180)
                         .padding(.horizontal, 40)
                         .shadow(color: .black, radius: 6)
-                } placeholder: {
-                    ProgressView()
-                        .scaleEffect(8)
                 }
             }
             

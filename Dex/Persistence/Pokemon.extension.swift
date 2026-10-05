@@ -1,5 +1,5 @@
 //
-//  PokemonExtension.swift
+//  Pokemon.extension.swift
 //  Dex
 //
 //  Created by Olivier Sbg on 02/10/2026.
@@ -8,6 +8,24 @@
 import SwiftUI
 
 extension Pokemon {
+    var spriteView: Image {
+        if let data = sprite,
+            let uiImage = UIImage(data: data) {
+            Image(uiImage: uiImage)
+        } else {
+            Image(systemName: "photo.slash")
+        }
+    }
+    
+    var shinyView: Image {
+        if let data = shiny,
+           let uiImage = UIImage(data: data) {
+            Image(uiImage: uiImage)
+        } else {
+            Image(systemName: "photo.slash.fill")
+        }
+    }
+    
     var background: ImageResource {
         switch types![0] {
         case "rock", "ground", "steel", "fighting", "ghost", "dark", "psychic":
