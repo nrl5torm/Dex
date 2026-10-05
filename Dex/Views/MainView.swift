@@ -13,7 +13,7 @@ struct MainView: View {
     ) private var viewContext
     
     @FetchRequest<Pokemon>(
-        sortDescriptors: [SortDescriptor(\.id)],
+        sortDescriptors: [SortDescriptor(\.id), SortDescriptor(\.favorite)],
         animation: .default
     ) private var selection
     
@@ -198,7 +198,7 @@ struct MainView: View {
 
                     try viewContext.save()
                     
-                    print("Fetched pokémon: #\(pokemon.id) \(pokemon.name!.capitalized)")
+//                    print("Fetched pokémon: #\(pokemon.id) \(pokemon.name!.capitalized)")
                 } catch {
                     print(error)
                 }
@@ -213,7 +213,7 @@ struct MainView: View {
     private func storeSprites() {
         Task {
             do {
-                print("\(pokedex.count) pokémons in pokédex")
+//                print("\(pokedex.count) pokémons in pokédex")
                 for pokemon in pokedex {
                     let (data, _) = try await URLSession.shared.data(from: pokemon.spriteURL!)
                     pokemon.sprite = data
@@ -221,7 +221,7 @@ struct MainView: View {
                     pokemon.shiny = try await URLSession.shared.data(from: pokemon.shinyURL!).0
                     
                     try viewContext.save()
-                    print("D/L'd sprites for pokémon: #\(pokemon.id) \(pokemon.name!.capitalized)")
+//                    print("D/L'd sprites for pokémon: #\(pokemon.id) \(pokemon.name!.capitalized)")
                 }
             } catch {
                 print(error)
