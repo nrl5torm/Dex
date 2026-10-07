@@ -19,6 +19,10 @@ struct MainView: View {
     
     @FetchRequest<Pokemon>(sortDescriptors: []
     ) private var pokedex
+    
+    @FetchRequest<Pokemon>(sortDescriptors: []
+    ) private var missingSpritePokemons
+    
     let NbPokemons = 151
     
     @State private var searchText = ""
@@ -168,6 +172,11 @@ struct MainView: View {
                     }
                 }
             }
+            .task {
+                if pokedex.count == NbPokemons {
+                    downloadSprites()
+                }
+            }
         }
     }
     
@@ -197,8 +206,6 @@ struct MainView: View {
                     pokemon.shinyURL = fetched.shinyURL
 
                     try viewContext.save()
-                    
-//                    print("Fetched pokémon: #\(pokemon.id) \(pokemon.name!.capitalized)")
                 } catch {
                     print(error)
                 }
@@ -206,23 +213,38 @@ struct MainView: View {
             
             fetching = false
             
-            storeSprites()
+            downloadSprites()
         }
     }
     
-    private func storeSprites() {
+    private func downloadSprites() {
         Task {
+            let spritePred = NSPredicate(format: "sprite = nil")
+            let shinyPred = NSPredicate(format: "shiny = nil")
+            missingSpritePokemons.nsPredicate = NSCompoundPredicate(orPredicateWithSubpredicates: [spritePred, shinyPred])
+            
+            let missingCount = missingSpritePokemons.count
+            guard missingCount != 0 else {
+                print("Sprites for \(NbPokemons) pokémons already downloaded.")
+                return
+            }
+            
             do {
-//                print("\(pokedex.count) pokémons in pokédex")
-                for pokemon in pokedex {
-                    let (data, _) = try await URLSession.shared.data(from: pokemon.spriteURL!)
-                    pokemon.sprite = data
+                for pokemon in missingSpritePokemons {
+                    if pokemon.sprite == nil {
+                        let (sprite, _) = try await URLSession.shared.data(from: pokemon.spriteURL!)
+                        pokemon.sprite = sprite
+                    }
                     
-                    pokemon.shiny = try await URLSession.shared.data(from: pokemon.shinyURL!).0
+                    if pokemon.shiny == nil {
+                        let (shiny, _) = try await URLSession.shared.data(from: pokemon.shinyURL!)
+                        pokemon.shiny = shiny
+                    }
                     
                     try viewContext.save()
-//                    print("D/L'd sprites for pokémon: #\(pokemon.id) \(pokemon.name!.capitalized)")
                 }
+            
+                print("Downloaded sprites for \(missingCount) pokémons.")
             } catch {
                 print(error)
             }

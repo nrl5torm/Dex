@@ -7,62 +7,98 @@
 
 import WidgetKit
 import SwiftUI
+import CoreData
 
 struct Provider: TimelineProvider {
-    func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry.placeholder
+    func getRandomPokemon() -> Pokemon {
+        var results: [Pokemon] = []
+        
+        do {
+            results = try PersistenceController.shared.container
+                .viewContext.fetch(Pokemon.fetchRequest())
+        } catch {
+            print("Couldn't fetch: \(error)")
+        }
+        
+        if let randomPokemon = results.randomElement() {
+            return randomPokemon
+        }
+        
+        return PersistenceController.previewPokemon
     }
-
-    func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
-        completion(SimpleEntry.placeholder)
+    
+    func placeholder(in context: Context) -> PokemonEntry {
+        PokemonEntry.placeholder1
     }
-
+    
+    func getSnapshot(in context: Context, completion: @escaping (PokemonEntry) -> ()) {
+        completion(PokemonEntry.placeholder1)
+    }
+    
     func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
-        var entries: [SimpleEntry] = []
-
-        for _ in 0 ..< 5 {
-            let entry = SimpleEntry.placeholder
+        var entries: [PokemonEntry] = []
+        
+        let currentDate = Date()
+        for seconds in 0 ..< 10 {
+            let entryDate = Calendar.current.date(
+                byAdding: .second,
+                value: seconds * 30,
+                to: currentDate)!
+            
+            let pokemon = getRandomPokemon()
+            let entry = PokemonEntry(
+                date: entryDate,
+                id: pokemon.id,
+                name: pokemon.name!,
+                types: pokemon.types!,
+                hp: pokemon.hp,
+                sprite: pokemon.spriteView)
+            
             entries.append(entry)
         }
-
+        
         let timeline = Timeline(entries: entries, policy: .atEnd)
         completion(timeline)
     }
-
+    
 }
 
-struct SimpleEntry: TimelineEntry {
+struct PokemonEntry: TimelineEntry {
     let date: Date
     
+    let id: Int16
     let name: String
     let types: [String]
     let hp: Int16
     let sprite: Image
     
-    static var placeholder: SimpleEntry {
-        SimpleEntry(date: .now,
-                    name: "bulbasaur",
-                    types: ["grass", "poison"],
-                    hp: 45,
-                    sprite: Image(.bulbasaur)
+    static var placeholder1: PokemonEntry {
+        PokemonEntry(date: .now,
+                     id: 1,
+                     name: "bulbasaur",
+                     types: ["grass", "poison"],
+                     hp: 45,
+                     sprite: Image(.bulbasaur)
         )
     }
     
-    static var placeholder2: SimpleEntry {
-        SimpleEntry(date: .now,
-                    name: "mew",
-                    types: ["psychic"],
-                    hp: 100,
-                    sprite: Image(.mew)
+    static var placeholder2: PokemonEntry {
+        PokemonEntry(date: .now,
+                     id: 151,
+                     name: "mew",
+                     types: ["psychic"],
+                     hp: 100,
+                     sprite: Image(.mew)
         )
     }
     
-    static var placeholder3: SimpleEntry {
-        SimpleEntry(date: .now,
-                    name: "charizard",
-                    types: ["fire", "flying"],
-                    hp: 78,
-                    sprite: Image(.charizard)
+    static var placeholder3: PokemonEntry {
+        PokemonEntry(date: .now,
+                     id: 6,
+                     name: "charizard",
+                     types: ["fire", "flying"],
+                     hp: 78,
+                     sprite: Image(.charizard)
         )
     }
 }
@@ -97,7 +133,7 @@ struct DexWidgetEntryView : View {
         Text("HP \(entry.hp)")
             .fontWeight(.semibold)
     }
-
+    
     var body: some View {
         switch widgetSize {
         case .systemSmall:
@@ -165,22 +201,25 @@ struct DexWidgetEntryView : View {
             }
         }
     }
+    
 }
+
 
 struct DexWidget: Widget {
     let kind: String = "DexWidget"
-
+    
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
-//            if #available(iOS 17.0, *) {
+            //            if #available(iOS 17.0, *) {
             DexWidgetEntryView(entry: entry)
                 .foregroundStyle(.black)
                 .containerBackground(Color(entry.types[0].capitalized), for: .widget)
-//            } else {
-//                DexWidgetEntryView(entry: entry)
-//                    .padding()
-//                    .background()
-//            }
+                .widgetURL(URL(string: "Dex://open/\(entry.id)"))
+            //            } else {
+            //                DexWidgetEntryView(entry: entry)
+            //                    .padding()
+            //                    .background()
+            //            }
         }
         .configurationDisplayName("Pokémon")
         .description("See a random Pokémon.")
@@ -190,33 +229,33 @@ struct DexWidget: Widget {
 #Preview(as: .systemSmall) {
     DexWidget()
 } timeline: {
-    SimpleEntry.placeholder
-    SimpleEntry.placeholder2
-    SimpleEntry.placeholder3
+    PokemonEntry.placeholder1
+    PokemonEntry.placeholder2
+    PokemonEntry.placeholder3
 }
 
 
 #Preview(as: .systemMedium) {
     DexWidget()
 } timeline: {
-    SimpleEntry.placeholder
-    SimpleEntry.placeholder2
-    SimpleEntry.placeholder3
+    PokemonEntry.placeholder1
+    PokemonEntry.placeholder2
+    PokemonEntry.placeholder3
 }
 
 
 #Preview(as: .systemLarge) {
     DexWidget()
 } timeline: {
-    SimpleEntry.placeholder
-    SimpleEntry.placeholder2
-    SimpleEntry.placeholder3
+    PokemonEntry.placeholder1
+    PokemonEntry.placeholder2
+    PokemonEntry.placeholder3
 }
 
 #Preview(as: .systemExtraLargePortrait) {
     DexWidget()
 } timeline: {
-    SimpleEntry.placeholder
-    SimpleEntry.placeholder2
-    SimpleEntry.placeholder3
+    PokemonEntry.placeholder1
+    PokemonEntry.placeholder2
+    PokemonEntry.placeholder3
 }

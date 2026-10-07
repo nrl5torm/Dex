@@ -16,6 +16,11 @@ struct DexApp: App {
         WindowGroup {
             MainView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
+                .onOpenURL { url in
+                    guard url.scheme == "Dex" else { return }
+                    print(url) // parse the url to get someAction to determine what the app needs do
+                    //TODO open corresponding detail view
+                }
         }
     }
 }
