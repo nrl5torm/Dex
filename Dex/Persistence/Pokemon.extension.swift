@@ -13,7 +13,7 @@ extension Pokemon {
             let uiImage = UIImage(data: data) {
             Image(uiImage: uiImage)
         } else {
-            Image(systemName: "photo.slash")
+            Image(.bulbasaur)
         }
     }
     

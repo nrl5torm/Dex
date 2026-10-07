@@ -28,11 +28,11 @@ struct Provider: TimelineProvider {
     }
     
     func placeholder(in context: Context) -> PokemonEntry {
-        PokemonEntry.placeholder1
+        PokemonEntry.entry1
     }
     
     func getSnapshot(in context: Context, completion: @escaping (PokemonEntry) -> ()) {
-        completion(PokemonEntry.placeholder1)
+        completion(PokemonEntry.entry1)
     }
     
     func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
@@ -46,21 +46,20 @@ struct Provider: TimelineProvider {
                 to: currentDate)!
             
             let pokemon = getRandomPokemon()
-            let entry = PokemonEntry(
+            
+            entries.append(PokemonEntry(
                 date: entryDate,
                 id: pokemon.id,
                 name: pokemon.name!,
                 types: pokemon.types!,
                 hp: pokemon.hp,
                 sprite: pokemon.spriteView)
-            
-            entries.append(entry)
+            )
         }
         
         let timeline = Timeline(entries: entries, policy: .atEnd)
         completion(timeline)
     }
-    
 }
 
 struct PokemonEntry: TimelineEntry {
@@ -72,7 +71,7 @@ struct PokemonEntry: TimelineEntry {
     let hp: Int16
     let sprite: Image
     
-    static var placeholder1: PokemonEntry {
+    static var entry1: PokemonEntry {
         PokemonEntry(date: .now,
                      id: 1,
                      name: "bulbasaur",
@@ -82,7 +81,7 @@ struct PokemonEntry: TimelineEntry {
         )
     }
     
-    static var placeholder2: PokemonEntry {
+    static var entry2: PokemonEntry {
         PokemonEntry(date: .now,
                      id: 151,
                      name: "mew",
@@ -92,7 +91,7 @@ struct PokemonEntry: TimelineEntry {
         )
     }
     
-    static var placeholder3: PokemonEntry {
+    static var entry3: PokemonEntry {
         PokemonEntry(date: .now,
                      id: 6,
                      name: "charizard",
@@ -210,16 +209,10 @@ struct DexWidget: Widget {
     
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
-            //            if #available(iOS 17.0, *) {
             DexWidgetEntryView(entry: entry)
                 .foregroundStyle(.black)
                 .containerBackground(Color(entry.types[0].capitalized), for: .widget)
-                .widgetURL(URL(string: "Dex://open/\(entry.id)"))
-            //            } else {
-            //                DexWidgetEntryView(entry: entry)
-            //                    .padding()
-            //                    .background()
-            //            }
+                .widgetURL(URL(string: "Dex://showPokemon/\(entry.id)"))
         }
         .configurationDisplayName("Pokémon")
         .description("See a random Pokémon.")
@@ -229,33 +222,23 @@ struct DexWidget: Widget {
 #Preview(as: .systemSmall) {
     DexWidget()
 } timeline: {
-    PokemonEntry.placeholder1
-    PokemonEntry.placeholder2
-    PokemonEntry.placeholder3
+    PokemonEntry.entry1
+    PokemonEntry.entry2
+    PokemonEntry.entry3
 }
-
 
 #Preview(as: .systemMedium) {
     DexWidget()
 } timeline: {
-    PokemonEntry.placeholder1
-    PokemonEntry.placeholder2
-    PokemonEntry.placeholder3
+    PokemonEntry.entry1
+    PokemonEntry.entry2
+    PokemonEntry.entry3
 }
-
 
 #Preview(as: .systemLarge) {
     DexWidget()
 } timeline: {
-    PokemonEntry.placeholder1
-    PokemonEntry.placeholder2
-    PokemonEntry.placeholder3
-}
-
-#Preview(as: .systemExtraLargePortrait) {
-    DexWidget()
-} timeline: {
-    PokemonEntry.placeholder1
-    PokemonEntry.placeholder2
-    PokemonEntry.placeholder3
+    PokemonEntry.entry1
+    PokemonEntry.entry2
+    PokemonEntry.entry3
 }

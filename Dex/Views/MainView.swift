@@ -21,7 +21,7 @@ struct MainView: View {
     ) private var pokedex
     
     @FetchRequest<Pokemon>(sortDescriptors: []
-    ) private var missingSpritePokemons
+    ) private var pokemonsMissingSprites
     
     let NbPokemons = 151
     
@@ -48,6 +48,8 @@ struct MainView: View {
         
         return NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
     }
+    
+    @State private var deepLinkedPokemon: Pokemon?
     
     var body: some View {
         if pokedex.isEmpty {
@@ -160,6 +162,10 @@ struct MainView: View {
                     PokemonDetailView()
                         .environmentObject(pokemon)
                 }
+                .navigationDestination(item: $deepLinkedPokemon) { pokemon in
+                    PokemonDetailView()
+                        .environmentObject(pokemon)
+                }
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button {
@@ -176,9 +182,21 @@ struct MainView: View {
                 if pokedex.count == NbPokemons {
                     downloadSprites()
                 }
+            }.onOpenURL { url in
+                guard url.scheme == "Dex" else { return }
+                guard let host = url.host(), host == "showPokemon" else { return }
+                
+                guard let pokemonId = Int16(url.lastPathComponent) else { return }
+                guard let pokémon = pokedex.first(where: { pokemon in
+                    pokemon.id == pokemonId
+                }) else { return }
+                
+                // open details for pokémon identified by deep link
+                deepLinkedPokemon = pokémon
             }
         }
     }
+        
     
     private func updateFilter() {
         selection.nsPredicate = dynamicPredicate
@@ -221,16 +239,16 @@ struct MainView: View {
         Task {
             let spritePred = NSPredicate(format: "sprite = nil")
             let shinyPred = NSPredicate(format: "shiny = nil")
-            missingSpritePokemons.nsPredicate = NSCompoundPredicate(orPredicateWithSubpredicates: [spritePred, shinyPred])
+            pokemonsMissingSprites.nsPredicate = NSCompoundPredicate(orPredicateWithSubpredicates: [spritePred, shinyPred])
             
-            let missingCount = missingSpritePokemons.count
-            guard missingCount != 0 else {
+            let nbPokemonsMissingSprites = pokemonsMissingSprites.count
+            guard nbPokemonsMissingSprites != 0 else {
                 print("Sprites for \(NbPokemons) pokémons already downloaded.")
                 return
             }
             
             do {
-                for pokemon in missingSpritePokemons {
+                for pokemon in pokemonsMissingSprites {
                     if pokemon.sprite == nil {
                         let (sprite, _) = try await URLSession.shared.data(from: pokemon.spriteURL!)
                         pokemon.sprite = sprite
@@ -244,7 +262,7 @@ struct MainView: View {
                     try viewContext.save()
                 }
             
-                print("Downloaded sprites for \(missingCount) pokémons.")
+                print("Downloaded missing sprites for \(nbPokemonsMissingSprites) pokémons.")
             } catch {
                 print(error)
             }
