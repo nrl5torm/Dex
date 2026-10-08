@@ -26,10 +26,10 @@ struct StatsView: View {
         }
         .frame(height: 200)
         .chartXScale(domain: 0...pokemon.highestStat.value
-                     + max(10, Int16(Double(pokemon.highestStat.value) * 0.2)))
+                     + max(10, Int(Double(pokemon.highestStat.value) * 0.2)))
     }
 }
 
 #Preview {
-    StatsView(pokemon: PersistenceController.previewPokemon)
+    StatsView(pokemon: DexModelContainer.previewPokemon)
 }

@@ -1,5 +1,5 @@
 //
-//  Persistence.swift
+//  DexModelContainer.swift
 //  Dex
 //
 //  Created by Olivier Sbg on 23/09/2026.
@@ -8,10 +8,9 @@
 import SwiftData
 import Foundation
 
-@MainActor
 struct DexModelContainer {
-    /// Persistent container ("database") for normal app execution
-    public let persistent: ModelContainer = {
+    /// Returns the persistent container ("database") for normal app execution
+    public static func buildPersistent() -> ModelContainer {
         let schema = Schema([
             Pokemon.self,
         ])
@@ -22,10 +21,10 @@ struct DexModelContainer {
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
         }
-    }()
+    }
     
     /// A sample pokemon for previews
-    static var previewPokemon: Pokemon {
+    public static var previewPokemon: Pokemon {
         let decoder = JSONDecoder()
         
         decoder.keyDecodingStrategy = .convertFromSnakeCase
@@ -37,12 +36,13 @@ struct DexModelContainer {
         return pokemon
     }
     
-    /// In-memory container with sample pokemon for previews
-    public let inMemory: ModelContainer = {
+    /// Returns the in-memory container with sample pokemon for previews
+    @MainActor
+    public static func buildInMemory() -> ModelContainer {
         let container = try! ModelContainer(for: Pokemon.self,
                                             configurations: ModelConfiguration(isStoredInMemoryOnly: true))
         
-        container.mainContext.insert(previewPokemon)
+        container.mainContext.insert(DexModelContainer.previewPokemon)
         return container
-    }()
+    }
 }

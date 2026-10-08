@@ -14,8 +14,7 @@ struct Provider: TimelineProvider {
         var results: [Pokemon] = []
         
         do {
-            results = try PersistenceController.shared.container
-                .viewContext.fetch(Pokemon.fetchRequest())
+//            results = try DexModelContainer.buildPersistent()
         } catch {
             print("Couldn't fetch: \(error)")
         }
@@ -24,7 +23,7 @@ struct Provider: TimelineProvider {
             return randomPokemon
         }
         
-        return PersistenceController.previewPokemon
+        return DexModelContainer.previewPokemon
     }
     
     func placeholder(in context: Context) -> PokemonEntry {
@@ -50,8 +49,8 @@ struct Provider: TimelineProvider {
             entries.append(PokemonEntry(
                 date: entryDate,
                 id: pokemon.id,
-                name: pokemon.name!,
-                types: pokemon.types!,
+                name: pokemon.name,
+                types: pokemon.types,
                 hp: pokemon.hp,
                 sprite: pokemon.spriteView)
             )
@@ -65,10 +64,10 @@ struct Provider: TimelineProvider {
 struct PokemonEntry: TimelineEntry {
     let date: Date
     
-    let id: Int16
+    let id: Int
     let name: String
     let types: [String]
-    let hp: Int16
+    let hp: Int
     let sprite: Image
     
     static var entry1: PokemonEntry {

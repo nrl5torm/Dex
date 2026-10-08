@@ -131,23 +131,21 @@ final class Pokemon: Decodable {
         shinyURL = try spritesContainer.decode(URL.self, forKey: .shinyURL)
     }
     
-    @MainActor
     var spriteView: Image {
         if let data = sprite,
            let uiImage = UIImage(data: data) {
             Image(uiImage: uiImage)
         } else {
-            Image(.bulbasaur)
+            Image("bulbasaur")
         }
     }
     
-    @MainActor
     var shinyView: Image {
         if let data = shiny,
            let uiImage = UIImage(data: data) {
             Image(uiImage: uiImage)
         } else {
-            Image(.shinybulbasaur)
+            Image("shinybulbasaur")
         }
     }
     

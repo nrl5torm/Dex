@@ -14,6 +14,6 @@ struct DexApp: App {
         WindowGroup {
             MainView()
         }
-        .modelContainer(DexModelContainer().persistent)
+        .modelContainer(DexModelContainer.buildPersistent())
     }
 }

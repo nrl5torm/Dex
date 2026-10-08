@@ -6,22 +6,14 @@
 //
 
 import SwiftUI
-import CoreData
+import SwiftData
 
 struct MainView: View {
-    @Environment(\EnvironmentValues.managedObjectContext
-    ) private var viewContext
+    @Environment(\.modelContext)
+    private var modelContext
     
-    @FetchRequest<Pokemon>(
-        sortDescriptors: [SortDescriptor(\.id), SortDescriptor(\.favorite)],
-        animation: .default
-    ) private var selection
-    
-    @FetchRequest<Pokemon>(sortDescriptors: []
-    ) private var pokedex
-    
-    @FetchRequest<Pokemon>(sortDescriptors: []
-    ) private var pokemonsMissingSprites
+    @Query(sort: \Pokemon.id, animation: .default)
+    private var pokedex: [Pokemon]
     
     let NbPokemons = 151
     
@@ -70,7 +62,7 @@ struct MainView: View {
             NavigationStack {
                 List {
                     Section() {
-                        ForEach(selection) { pokemon in
+                        ForEach(pokedex) { pokemon in
                             NavigationLink(value: pokemon) {
                                 if pokemon.sprite == nil {
                                     AsyncImage(url: pokemon.spriteURL) { image in
@@ -90,7 +82,7 @@ struct MainView: View {
                                 
                                 VStack(alignment: .leading) {
                                     HStack {
-                                        Text(pokemon.name!.capitalized)
+                                        Text(pokemon.name.capitalized)
                                             .fontWeight(.bold)
                                         
                                         if pokemon.favorite {
@@ -99,7 +91,7 @@ struct MainView: View {
                                         }
                                     }
                                     HStack {
-                                        ForEach(pokemon.types!, id: \.self) { type in
+                                        ForEach(pokemon.types, id: \.self) { type in
                                             Text(type.capitalized)
                                                 .font(.subheadline)
                                                 .fontWeight(.semibold)
@@ -117,7 +109,7 @@ struct MainView: View {
                                 Button(pokemon.favorite ? "Unfavorite" : "Favorite", systemImage: "star") {
                                     pokemon.favorite.toggle()
                                     do {
-                                        try viewContext.save()
+                                        try modelContext.save()
                                     } catch {
                                         print(error)
                                     }
@@ -142,7 +134,7 @@ struct MainView: View {
                                 Text("The fetch was interrupted!\n Fetch the rest of the Pokémons:")
                             } actions: {
                                 Button("Fetch Pokémons", systemImage: "arrow.down.circle") {
-                                    getPokemons(from: selection.count + 1)
+                                    getPokemons(from: pokedex.count + 1)
                                 }
                                 .buttonStyle(.borderedProminent)
                             }
@@ -152,19 +144,11 @@ struct MainView: View {
                 }
                 .navigationTitle("Pokédex")
                 .searchable(text: $searchText, prompt: "Find a Pokémon")
-                .onChange(of: searchText, {
-                    updateFilter()
-                })
-                .onChange(of: filterByFavorites, {
-                    updateFilter()
-                })
                 .navigationDestination(for: Pokemon.self) { pokemon in
-                    PokemonDetailView()
-                        .environmentObject(pokemon)
+                    PokemonDetailView(pokemon: pokemon)
                 }
                 .navigationDestination(item: $deepLinkedPokemon) { pokemon in
-                    PokemonDetailView()
-                        .environmentObject(pokemon)
+                    PokemonDetailView(pokemon: pokemon)
                 }
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
@@ -196,11 +180,6 @@ struct MainView: View {
             }
         }
     }
-        
-    
-    private func updateFilter() {
-        selection.nsPredicate = dynamicPredicate
-    }
     
     private func getPokemons(from startId: Int) {
         fetching = true
@@ -209,21 +188,7 @@ struct MainView: View {
             for id in startId...NbPokemons {
                 do {
                     let fetched = try await fetcher.fetchPokemon(id: id)
-
-                    let pokemon = Pokemon(context: viewContext)
-                    pokemon.id = fetched.id
-                    pokemon.name = fetched.name
-                    pokemon.types = fetched.types
-                    pokemon.hp = fetched.hp
-                    pokemon.attack = fetched.attack
-                    pokemon.defense = fetched.defense
-                    pokemon.specialAttack = fetched.specialAttack
-                    pokemon.specialDefense = fetched.specialDefense
-                    pokemon.speed = fetched.speed
-                    pokemon.spriteURL = fetched.spriteURL
-                    pokemon.shinyURL = fetched.shinyURL
-
-                    try viewContext.save()
+                    modelContext.insert(fetched)
                 } catch {
                     print(error)
                 }
@@ -237,10 +202,11 @@ struct MainView: View {
     
     private func downloadSprites() {
         Task {
-            let spritePred = NSPredicate(format: "sprite = nil")
-            let shinyPred = NSPredicate(format: "shiny = nil")
-            pokemonsMissingSprites.nsPredicate = NSCompoundPredicate(orPredicateWithSubpredicates: [spritePred, shinyPred])
-            
+            //TODO
+//            let spritePred = NSPredicate(format: "sprite = nil")
+//            let shinyPred = NSPredicate(format: "shiny = nil")
+//            let nsPredicate = NSCompoundPredicate(orPredicateWithSubpredicates: [spritePred, shinyPred])
+            let pokemonsMissingSprites = pokedex
             let nbPokemonsMissingSprites = pokemonsMissingSprites.count
             guard nbPokemonsMissingSprites != 0 else {
                 print("Sprites for \(NbPokemons) pokémons already downloaded.")
@@ -250,16 +216,16 @@ struct MainView: View {
             do {
                 for pokemon in pokemonsMissingSprites {
                     if pokemon.sprite == nil {
-                        let (sprite, _) = try await URLSession.shared.data(from: pokemon.spriteURL!)
+                        let (sprite, _) = try await URLSession.shared.data(from: pokemon.spriteURL)
                         pokemon.sprite = sprite
                     }
                     
                     if pokemon.shiny == nil {
-                        let (shiny, _) = try await URLSession.shared.data(from: pokemon.shinyURL!)
+                        let (shiny, _) = try await URLSession.shared.data(from: pokemon.shinyURL)
                         pokemon.shiny = shiny
                     }
                     
-                    try viewContext.save()
+                    try modelContext.save()
                 }
             
                 print("Downloaded missing sprites for \(nbPokemonsMissingSprites) pokémons.")
@@ -271,7 +237,6 @@ struct MainView: View {
 }
 
 #Preview {
-    MainView().environment(
-        \.managedObjectContext,
-         PersistenceController.preview.container.viewContext)
+    MainView()
+        .modelContainer(DexModelContainer.buildInMemory())
 }
