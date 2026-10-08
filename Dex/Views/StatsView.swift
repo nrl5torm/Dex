@@ -27,6 +27,17 @@ struct StatsView: View {
         .frame(height: 200)
         .chartXScale(domain: 0...pokemon.highestStat.value
                      + max(10, Int(Double(pokemon.highestStat.value) * 0.2)))
+        .chartXAxis {
+            AxisMarks {
+                AxisGridLine()
+                AxisValueLabel(anchor: .topLeading)
+            }
+        }
+        .chartYAxis {
+            AxisMarks {
+                AxisValueLabel(anchor: .topLeading)
+            }
+        }
     }
 }
 

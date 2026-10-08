@@ -19,29 +19,24 @@ struct MainView: View {
     
     @State private var searchText = ""
     @State private var filterByFavorites = false
+    @State private var deepLinkedPokemon: Pokemon?
     @State private var fetching = false
-    
+
     private let fetcher = Fetcher()
     
-    private var dynamicPredicate: NSPredicate {
-        var predicates: [NSPredicate] = []
-        
-        if !searchText.isEmpty {
-            let nameContains = NSPredicate(format: "name contains[c] %@", searchText)
-            let idContains = NSPredicate(format: "id contains %@", searchText)
-
-            predicates.append(
-                NSCompoundPredicate(orPredicateWithSubpredicates: [nameContains, idContains]))
+    private var dynamicPredicate: Predicate<Pokemon> {
+        #Predicate<Pokemon> { pokemon in
+            if filterByFavorites && !searchText.isEmpty {
+                pokemon.favorite && pokemon.name.localizedStandardContains(searchText)
+            } else if !searchText.isEmpty {
+                pokemon.name.localizedStandardContains(searchText)
+            } else if filterByFavorites {
+                pokemon.favorite
+            } else {
+                true
+            }
         }
-        
-        if filterByFavorites {
-            predicates.append(NSPredicate(format: "favorite == %d", true))
-        }
-        
-        return NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
     }
-    
-    @State private var deepLinkedPokemon: Pokemon?
     
     var body: some View {
         if pokedex.isEmpty {
@@ -62,7 +57,7 @@ struct MainView: View {
             NavigationStack {
                 List {
                     Section() {
-                        ForEach(pokedex) { pokemon in
+                        ForEach((try? pokedex.filter(dynamicPredicate)) ?? pokedex) { pokemon in
                             NavigationLink(value: pokemon) {
                                 if pokemon.sprite == nil {
                                     AsyncImage(url: pokemon.spriteURL) { image in
@@ -144,6 +139,7 @@ struct MainView: View {
                 }
                 .navigationTitle("Pokédex")
                 .searchable(text: $searchText, prompt: "Find a Pokémon")
+                .animation(.default, value: searchText)
                 .navigationDestination(for: Pokemon.self) { pokemon in
                     PokemonDetailView(pokemon: pokemon)
                 }
@@ -153,7 +149,9 @@ struct MainView: View {
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button {
-                            filterByFavorites.toggle()
+                            withAnimation {
+                                filterByFavorites.toggle()
+                            }
                         } label: {
                             Label("Show only favorites",
                                   systemImage: filterByFavorites ? "star.fill" : "star")
@@ -169,13 +167,14 @@ struct MainView: View {
             }.onOpenURL { url in
                 guard url.scheme == "Dex" else { return }
                 guard let host = url.host(), host == "showPokemon" else { return }
-                
                 guard let pokemonId = Int16(url.lastPathComponent) else { return }
+                
                 guard let pokémon = pokedex.first(where: { pokemon in
                     pokemon.id == pokemonId
-                }) else { return }
-                
-                // open details for pokémon identified by deep link
+                }) else {
+                    return
+                }
+                // will navigate to pokemon detail view
                 deepLinkedPokemon = pokémon
             }
         }
@@ -202,16 +201,16 @@ struct MainView: View {
     
     private func downloadSprites() {
         Task {
-            //TODO
-//            let spritePred = NSPredicate(format: "sprite = nil")
-//            let shinyPred = NSPredicate(format: "shiny = nil")
-//            let nsPredicate = NSCompoundPredicate(orPredicateWithSubpredicates: [spritePred, shinyPred])
-            let pokemonsMissingSprites = pokedex
-            let nbPokemonsMissingSprites = pokemonsMissingSprites.count
-            guard nbPokemonsMissingSprites != 0 else {
-                print("Sprites for \(NbPokemons) pokémons already downloaded.")
+            
+            guard let pokemonsMissingSprites = try? pokedex.filter(#Predicate<Pokemon> { pokemon in
+                pokemon.sprite == nil || pokemon.shiny == nil
+            }) else {
+                print("Predicate for pokémons missing sprites failed.")
                 return
             }
+            
+            let nbPokemonsMissingSprites = pokemonsMissingSprites.count
+            print("Sprites for \(NbPokemons - nbPokemonsMissingSprites) pokémons already downloaded.")
             
             do {
                 for pokemon in pokemonsMissingSprites {
@@ -228,7 +227,7 @@ struct MainView: View {
                     try modelContext.save()
                 }
             
-                print("Downloaded missing sprites for \(nbPokemonsMissingSprites) pokémons.")
+                print("Downloaded sprites for \(nbPokemonsMissingSprites) remaining pokémons.")
             } catch {
                 print(error)
             }
