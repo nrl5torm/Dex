@@ -53,7 +53,9 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Assets.xcassets,
-				Persistence/PersistenceController.swift,
+				Persistence/DexModelContainer.swift,
+				ViewModel/Pokemon.swift,
+				ViewModel/Stat.swift,
 			);
 			target = C533CDE93073E48600A2AC84 /* DexWidgetExtension */;
 		};
