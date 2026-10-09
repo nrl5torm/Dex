@@ -14,7 +14,7 @@ struct MainView: View {
     @Query(sort: \Pokemon.id, animation: .default)
     private var pokedex: [Pokemon]
     
-    let NbPokemons = 151
+    let NbPokemons = 1025
     
     @State private var searchText = ""
     @State private var filterByFavorites = false
