@@ -9,8 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct MainView: View {
-    @Environment(\.modelContext)
-    private var modelContext
+    @Environment(\.modelContext) private var modelContext
     
     @Query(sort: \Pokemon.id, animation: .default)
     private var pokedex: [Pokemon]
@@ -25,16 +24,9 @@ struct MainView: View {
     private let fetcher = Fetcher()
     
     private var dynamicPredicate: Predicate<Pokemon> {
-        #Predicate<Pokemon> { pokemon in
-            if filterByFavorites && !searchText.isEmpty {
-                pokemon.favorite && pokemon.name.localizedStandardContains(searchText)
-            } else if !searchText.isEmpty {
-                pokemon.name.localizedStandardContains(searchText)
-            } else if filterByFavorites {
-                pokemon.favorite
-            } else {
-                true
-            }
+        #Predicate<Pokemon> { 
+            (!filterByFavorites || $0.favorite) &&
+            (searchText.isEmpty || $0.searchKey.localizedStandardContains(searchText))
         }
     }
     

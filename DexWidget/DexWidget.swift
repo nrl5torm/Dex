@@ -7,104 +7,11 @@
 
 import WidgetKit
 import SwiftUI
-import CoreData
-
-struct Provider: TimelineProvider {
-    func getRandomPokemon() -> Pokemon {
-        var results: [Pokemon] = []
-        
-        do {
-//            results = try DexModelContainer.buildPersistent()
-        } catch {
-            print("Couldn't fetch: \(error)")
-        }
-        
-        if let randomPokemon = results.randomElement() {
-            return randomPokemon
-        }
-        
-        return DexModelContainer.previewPokemon
-    }
-    
-    func placeholder(in context: Context) -> PokemonEntry {
-        PokemonEntry.entry1
-    }
-    
-    func getSnapshot(in context: Context, completion: @escaping (PokemonEntry) -> ()) {
-        completion(PokemonEntry.entry1)
-    }
-    
-    func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
-        var entries: [PokemonEntry] = []
-        
-        let currentDate = Date()
-        for seconds in 0 ..< 10 {
-            let entryDate = Calendar.current.date(
-                byAdding: .second,
-                value: seconds * 30,
-                to: currentDate)!
-            
-            let pokemon = getRandomPokemon()
-            
-            entries.append(PokemonEntry(
-                date: entryDate,
-                id: pokemon.id,
-                name: pokemon.name,
-                types: pokemon.types,
-                hp: pokemon.hp,
-                sprite: pokemon.spriteView)
-            )
-        }
-        
-        let timeline = Timeline(entries: entries, policy: .atEnd)
-        completion(timeline)
-    }
-}
-
-struct PokemonEntry: TimelineEntry {
-    let date: Date
-    
-    let id: Int
-    let name: String
-    let types: [String]
-    let hp: Int
-    let sprite: Image
-    
-    static var entry1: PokemonEntry {
-        PokemonEntry(date: .now,
-                     id: 1,
-                     name: "bulbasaur",
-                     types: ["grass", "poison"],
-                     hp: 45,
-                     sprite: Image(.bulbasaur)
-        )
-    }
-    
-    static var entry2: PokemonEntry {
-        PokemonEntry(date: .now,
-                     id: 151,
-                     name: "mew",
-                     types: ["psychic"],
-                     hp: 100,
-                     sprite: Image(.mew)
-        )
-    }
-    
-    static var entry3: PokemonEntry {
-        PokemonEntry(date: .now,
-                     id: 6,
-                     name: "charizard",
-                     types: ["fire", "flying"],
-                     hp: 78,
-                     sprite: Image(.charizard)
-        )
-    }
-}
 
 struct DexWidgetEntryView : View {
     @Environment(\.widgetFamily) var widgetSize
     
-    var entry: Provider.Entry
+    var entry: DexTimelineProvider.Entry
     
     var pokemonImage: some View {
         entry.sprite
@@ -199,15 +106,13 @@ struct DexWidgetEntryView : View {
             }
         }
     }
-    
 }
-
 
 struct DexWidget: Widget {
     let kind: String = "DexWidget"
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: Provider()) { entry in
+        StaticConfiguration(kind: kind, provider: DexTimelineProvider()) { entry in
             DexWidgetEntryView(entry: entry)
                 .foregroundStyle(.black)
                 .containerBackground(Color(entry.types[0].capitalized), for: .widget)
@@ -217,6 +122,7 @@ struct DexWidget: Widget {
         .description("See a random Pokémon.")
     }
 }
+
 
 #Preview(as: .systemSmall) {
     DexWidget()
@@ -235,6 +141,14 @@ struct DexWidget: Widget {
 }
 
 #Preview(as: .systemLarge) {
+    DexWidget()
+} timeline: {
+    PokemonEntry.entry1
+    PokemonEntry.entry2
+    PokemonEntry.entry3
+}
+
+#Preview(as: .systemExtraLargePortrait) {
     DexWidget()
 } timeline: {
     PokemonEntry.entry1

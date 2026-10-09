@@ -131,6 +131,10 @@ final class Pokemon: Decodable {
         shinyURL = try spritesContainer.decode(URL.self, forKey: .shinyURL)
     }
     
+    var searchKey: String {
+        "\(name) \(id)"
+    }
+    
     var spriteView: Image {
         if let data = sprite,
            let uiImage = UIImage(data: data) {
