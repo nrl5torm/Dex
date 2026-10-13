@@ -16,6 +16,10 @@ final class Pokemon: Decodable {
     var id: Int
     
     var name: String
+    var nameFR: String?
+    var nameJAro: String?
+    var nameJAhk: String?
+    
     var types: [String]
     
     var hp: Int
@@ -132,7 +136,7 @@ final class Pokemon: Decodable {
     }
     
     var searchKey: String {
-        "\(name) \(id)"
+        "\(name) \(nameFR ?? "") \(id)"
     }
     
     var spriteView: Image {

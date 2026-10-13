@@ -14,7 +14,7 @@ struct MainView: View {
     @Query(sort: \Pokemon.id, animation: .default)
     private var pokedex: [Pokemon]
     
-    let NbPokemons = 1025
+    let NbPokemons = 25//1025
     
     @State private var searchText = ""
     @State private var filterByFavorites = false
@@ -24,9 +24,11 @@ struct MainView: View {
     private let fetcher = Fetcher()
     
     private var dynamicPredicate: Predicate<Pokemon> {
-        #Predicate<Pokemon> { 
+        let normalizedSearchText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        return #Predicate<Pokemon> {
             (!filterByFavorites || $0.favorite) &&
-            (searchText.isEmpty || $0.searchKey.localizedStandardContains(searchText))
+            (normalizedSearchText.isEmpty || $0.searchKey.localizedStandardContains(normalizedSearchText))
         }
     }
     
@@ -179,6 +181,12 @@ struct MainView: View {
             for id in startId...NbPokemons {
                 do {
                     let fetched = try await fetcher.fetchPokemon(id: id)
+                    let species = try await fetcher.fetchSpecies(id: id)
+                    
+                    fetched.nameFR = species.nameFR
+                    fetched.nameJAhk = species.nameJAhk
+                    fetched.nameJAro = species.nameJAro
+                    
                     modelContext.insert(fetched)
                 } catch {
                     print(error)
