@@ -16,21 +16,14 @@ struct PokemonSpecies: Decodable {
         let language: Language
     }
     
-    var nameFR: String? {
-        names.first { n in
-            n.language.name == .fr
-        }?.name
+    struct Language: Decodable {
+        let name: DexLanguageCode
+        let url: URL
     }
-    
-    var nameJAhk: String? {
+
+    func name(in language: DexLanguageCode) -> String? {
         names.first { n in
-            n.language.name == .jaHrkt
-        }?.name
-    }
-    
-    var nameJAro: String? {
-        names.first { n in
-            n.language.name == .jaRoma
+            n.language.name == language
         }?.name
     }
 }

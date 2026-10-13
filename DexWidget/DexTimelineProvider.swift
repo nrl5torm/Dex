@@ -10,7 +10,7 @@ import SwiftData
 
 struct DexTimelineProvider: TimelineProvider {
     private var modelContainer = DexModelContainer.buildPersistent()
-    
+
     func placeholder(in context: Context) -> PokemonEntry {
         PokemonEntry.entry1
     }
@@ -56,7 +56,7 @@ struct DexTimelineProvider: TimelineProvider {
             entries.append(PokemonEntry(
                 date: entryDate,
                 id: pokemon.id,
-                name: pokemon.localizedName(in: .fr),
+                name: pokemon.localizedName(in: DexLanguageCode.userLanguage),
                 types: pokemon.types,
                 hp: pokemon.hp,
                 sprite: pokemon.spriteView)

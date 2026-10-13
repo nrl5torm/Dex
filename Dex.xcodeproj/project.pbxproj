@@ -53,7 +53,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Assets.xcassets,
-				Fetcher/Language.swift,
+				DexLanguageCode.swift,
 				Persistence/DexModelContainer.swift,
 				Persistence/Pokemon.swift,
 				Persistence/Stat.swift,

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 struct MainView: View {
     @Environment(\.modelContext) private var modelContext
@@ -23,11 +24,10 @@ struct MainView: View {
 
     private let fetcher = Fetcher()
 
-    private var supportedLanguages: [LanguageCode] {
-        [.en, .fr, .ja]
-    }
-    @State private var selectedLanguage: LanguageCode = .fr
-
+    @AppStorage(
+        DexLanguageCode.Storage.key,
+        store: UserDefaults(suiteName: DexLanguageCode.Storage.group)
+    ) private var selectedLanguage: DexLanguageCode = .defaultEN
     
     private var dynamicPredicate: Predicate<Pokemon> {
         let normalizedSearchText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -56,7 +56,7 @@ struct MainView: View {
     
             NavigationStack {
                 List {
-                    Section() {
+                    Section {
                         ForEach((try? pokedex.filter(dynamicPredicate)) ?? pokedex) { pokemon in
                             NavigationLink(value: pokemon) {
                                 if pokemon.sprite == nil {
@@ -112,6 +112,8 @@ struct MainView: View {
                                 .tint(pokemon.favorite ? .gray : .yellow)
                             }
                         }
+                    } header: {
+//                        Text("Generation I") TODO
                     } footer: {
                         if fetching {
                             HStack() {
@@ -141,18 +143,21 @@ struct MainView: View {
                 .searchable(text: $searchText, prompt: "Find a Pokémon")
                 .animation(.default, value: searchText)
                 .navigationDestination(for: Pokemon.self) { pokemon in
-                    PokemonDetailView(pokemon: pokemon, language: selectedLanguage)
+                    PokemonDetailView(pokemon: pokemon)
                 }
                 .navigationDestination(item: $deepLinkedPokemon) { pokemon in
-                    PokemonDetailView(pokemon: pokemon, language: selectedLanguage)
+                    PokemonDetailView(pokemon: pokemon)
                 }
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Menu {
                             Picker("Language", selection: $selectedLanguage.animation()) {
-                                ForEach(supportedLanguages) { language in
+                                ForEach(DexLanguageCode.supportedLanguages) { language in
                                     Text("\(language.flag) \(language.displayName)")
                                 }
+                            }
+                            .onChange(of: selectedLanguage) {
+                                WidgetCenter.shared.reloadAllTimelines()
                             }
                         } label: {
                             Text(selectedLanguage.flag)
@@ -201,9 +206,9 @@ struct MainView: View {
                     let fetched = try await fetcher.fetchPokemon(id: id)
                     let species = try await fetcher.fetchSpecies(id: id)
                     
-                    fetched.nameFR = species.nameFR
-                    fetched.nameJAhk = species.nameJAhk
-                    fetched.nameJAro = species.nameJAro
+                    fetched.nameFR = species.name(in: .fr)
+                    fetched.nameJAhk = species.name(in: .jaHrkt)
+                    fetched.nameJAro = species.name(in: .jaRoma)
                     
                     modelContext.insert(fetched)
                 } catch {

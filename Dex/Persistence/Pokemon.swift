@@ -111,9 +111,9 @@ final class Pokemon: Decodable {
                 decodedStats[.attack] = baseStat
             case "defense":
                 decodedStats[.defense] = baseStat
-            case "specialAttack":
+            case "special-attack":
                 decodedStats[.specialAttack] = baseStat
-            case "specialDefense":
+            case "special-defense":
                 decodedStats[.specialDefense] = baseStat
             case "speed":
                 decodedStats[.speed] = baseStat
@@ -157,7 +157,7 @@ final class Pokemon: Decodable {
         }
     }
     
-    func localizedName(in language: LanguageCode) -> String {
+    func localizedName(in language: DexLanguageCode) -> String {
         let localized = switch language {
         case .fr where nameFR != nil:
             nameFR

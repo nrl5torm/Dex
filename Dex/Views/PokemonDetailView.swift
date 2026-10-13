@@ -13,7 +13,6 @@ struct PokemonDetailView: View {
     private var modelContext
     
     public var pokemon: Pokemon
-    public var language: LanguageCode
     
     @State private var showShiny = false
     
@@ -81,15 +80,33 @@ struct PokemonDetailView: View {
             
             VStack(alignment: .leading) {
                 Text("Stats:")
-                    .font(.title)
-                    .padding(.bottom, -7)
+                    .font(.title2)
+                    .fontWeight(.medium)
+                    .padding(.bottom, -5)
                 
                 StatsView(pokemon: pokemon)
             }
             .padding(.horizontal)
             .padding(.bottom)
+            
+            VStack(alignment: .leading) {
+                Text("Translations:")
+                    .font(.title2)
+                    .fontWeight(.medium)
+                    .padding(.bottom, 5)
+                
+                ForEach(DexLanguageCode.supportedLanguages) { language in
+                    HStack {
+                        Text("\(language.flag) \(pokemon.localizedName(in: language))")
+                            .font(.title3)
+                        Spacer()
+                    }
+                }
+            }
+            .padding(.horizontal)
+            .padding(.bottom)
         }
-        .navigationTitle("#\(String(pokemon.id)) \(pokemon.localizedName(in: language))")
+        .navigationTitle("#\(String(pokemon.id)) \(pokemon.localizedName(in: DexLanguageCode.userLanguage))")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
@@ -105,6 +122,6 @@ struct PokemonDetailView: View {
 
 #Preview {
     NavigationStack {
-        PokemonDetailView(pokemon: DexModelContainer.previewPokemon, language: .en)
+        PokemonDetailView(pokemon: DexModelContainer.previewPokemon)
     }
 }
