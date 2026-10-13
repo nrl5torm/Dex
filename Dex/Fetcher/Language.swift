@@ -12,7 +12,7 @@ struct Language: Decodable {
     let url: URL
 }
 
-enum LanguageCode: String, Decodable {
+enum LanguageCode: String, Decodable, Identifiable {
     case de
     case en
     case es
@@ -26,9 +26,9 @@ enum LanguageCode: String, Decodable {
     case ko
     case zhHans = "zh-hans"
     case zhHant = "zh-hant"
-}
-
-extension LanguageCode {
+    
+    var id: LanguageCode { self }
+    
     var displayName: String {
         switch self {
         case .en:

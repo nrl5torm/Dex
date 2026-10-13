@@ -149,15 +149,13 @@ struct MainView: View {
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Menu {
-                            ForEach(supportedLanguages, id: \.self) { language in
-                                Button {
-                                    selectedLanguage = language
-                                } label: {
+                            Picker("Language", selection: $selectedLanguage.animation()) {
+                                ForEach(supportedLanguages) { language in
                                     Text("\(language.flag) \(language.displayName)")
                                 }
                             }
                         } label: {
-                            Label("\(selectedLanguage.flag) \(selectedLanguage.displayName)", systemImage: "globe")
+                            Text(selectedLanguage.flag)
                         }
                     }
 

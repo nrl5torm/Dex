@@ -136,7 +136,7 @@ final class Pokemon: Decodable {
     }
     
     var searchKey: String {
-        "\(name) \(nameFR ?? "") \(id)"
+        "\(name) \(nameFR ?? "") \(nameJAro ?? "") \(id)"
     }
     
     var spriteView: Image {

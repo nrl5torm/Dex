@@ -105,6 +105,6 @@ struct PokemonDetailView: View {
 
 #Preview {
     NavigationStack {
-        PokemonDetailView(pokemon: DexModelContainer.previewPokemon, language: .fr)
+        PokemonDetailView(pokemon: DexModelContainer.previewPokemon, language: .en)
     }
 }
