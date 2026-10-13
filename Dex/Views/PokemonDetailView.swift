@@ -88,7 +88,7 @@ struct PokemonDetailView: View {
             .padding(.horizontal)
             .padding(.bottom)
         }
-        .navigationTitle("#\(pokemon.id) \(pokemon.name.capitalized)")
+        .navigationTitle("#\(String(pokemon.id)) \(pokemon.name.capitalized)")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
