@@ -56,7 +56,7 @@ struct DexTimelineProvider: TimelineProvider {
             entries.append(PokemonEntry(
                 date: entryDate,
                 id: pokemon.id,
-                name: pokemon.name,
+                name: pokemon.localizedName(in: .fr),
                 types: pokemon.types,
                 hp: pokemon.hp,
                 sprite: pokemon.spriteView)

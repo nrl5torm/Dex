@@ -157,26 +157,40 @@ final class Pokemon: Decodable {
         }
     }
     
-    @MainActor
-    var background: ImageResource {
-        switch types[0] {
-        case "rock", "ground", "steel", "fighting", "ghost", "dark", "psychic":
-                .rockgroundsteelfightingghostdarkpsychic
+    func localizedName(in language: LanguageCode) -> String {
+        let localized = switch language {
+        case .fr where nameFR != nil:
+            nameFR
             
-        case "fire", "dragon":
-                .firedragon
-            
-        case "flying", "bug":
-                .flyingbug
-            
-        case "ice":
-                .ice
-            
-        case "water":
-                .water
+        case .ja where nameJAhk != nil:
+            "\(nameJAhk!) \(nameJAro ?? name)"
             
         default:
-                .normalgrasselectricpoisonfairy
+            name
+        }
+        
+        return localized!.capitalized
+    }
+    
+    var background: Image {
+        switch types[0] {
+        case "rock", "ground", "steel", "fighting", "ghost", "dark", "psychic":
+            Image("rockgroundsteelfightingghostdarkpsychic")
+            
+        case "fire", "dragon":
+            Image("firedragon")
+            
+        case "flying", "bug":
+            Image("flyingbug")
+            
+        case "ice":
+            Image("ice")
+            
+        case "water":
+            Image("water")
+            
+        default:
+            Image("normalgrasselectricpoisonfairy")
         }
     }
     

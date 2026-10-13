@@ -8,11 +8,11 @@
 import Foundation
 
 struct Language: Decodable {
-    let name: LanguageName
+    let name: LanguageCode
     let url: URL
 }
 
-enum LanguageName: String, Decodable {
+enum LanguageCode: String, Decodable {
     case de
     case en
     case es
@@ -27,3 +27,32 @@ enum LanguageName: String, Decodable {
     case zhHans = "zh-hans"
     case zhHant = "zh-hant"
 }
+
+extension LanguageCode {
+    var displayName: String {
+        switch self {
+        case .en:
+            "English"
+        case .fr:
+            "Français"
+        case .ja:
+            "日本語"
+        default:
+            rawValue
+        }
+    }
+
+    var flag: String {
+        switch self {
+        case .en:
+            "🇬🇧"
+        case .fr:
+            "🇫🇷"
+        case .ja:
+            "🇯🇵"
+        default:
+            "🌐"
+        }
+    }
+}
+

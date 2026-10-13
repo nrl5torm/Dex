@@ -14,7 +14,7 @@ struct MainView: View {
     @Query(sort: \Pokemon.id, animation: .default)
     private var pokedex: [Pokemon]
     
-    let NbPokemons = 25//1025
+    let NbPokemons = 1025
     
     @State private var searchText = ""
     @State private var filterByFavorites = false
@@ -22,6 +22,12 @@ struct MainView: View {
     @State private var fetching = false
 
     private let fetcher = Fetcher()
+
+    private var supportedLanguages: [LanguageCode] {
+        [.en, .fr, .ja]
+    }
+    @State private var selectedLanguage: LanguageCode = .fr
+
     
     private var dynamicPredicate: Predicate<Pokemon> {
         let normalizedSearchText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -71,7 +77,7 @@ struct MainView: View {
                                 
                                 VStack(alignment: .leading) {
                                     HStack {
-                                        Text(pokemon.name.capitalized)
+                                        Text(pokemon.localizedName(in: selectedLanguage))
                                             .fontWeight(.bold)
                                         
                                         if pokemon.favorite {
@@ -135,12 +141,26 @@ struct MainView: View {
                 .searchable(text: $searchText, prompt: "Find a Pokémon")
                 .animation(.default, value: searchText)
                 .navigationDestination(for: Pokemon.self) { pokemon in
-                    PokemonDetailView(pokemon: pokemon)
+                    PokemonDetailView(pokemon: pokemon, language: selectedLanguage)
                 }
                 .navigationDestination(item: $deepLinkedPokemon) { pokemon in
-                    PokemonDetailView(pokemon: pokemon)
+                    PokemonDetailView(pokemon: pokemon, language: selectedLanguage)
                 }
                 .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Menu {
+                            ForEach(supportedLanguages, id: \.self) { language in
+                                Button {
+                                    selectedLanguage = language
+                                } label: {
+                                    Text("\(language.flag) \(language.displayName)")
+                                }
+                            }
+                        } label: {
+                            Label("\(selectedLanguage.flag) \(selectedLanguage.displayName)", systemImage: "globe")
+                        }
+                    }
+
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button {
                             withAnimation {

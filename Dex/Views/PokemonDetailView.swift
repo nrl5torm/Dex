@@ -13,13 +13,14 @@ struct PokemonDetailView: View {
     private var modelContext
     
     public var pokemon: Pokemon
+    public var language: LanguageCode
     
     @State private var showShiny = false
     
     var body: some View {
         ScrollView {
             ZStack {
-                Image(pokemon.background)
+                pokemon.background
                     .resizable()
                     .scaledToFit()
                 
@@ -88,7 +89,7 @@ struct PokemonDetailView: View {
             .padding(.horizontal)
             .padding(.bottom)
         }
-        .navigationTitle("#\(String(pokemon.id)) \(pokemon.name.capitalized)")
+        .navigationTitle("#\(String(pokemon.id)) \(pokemon.localizedName(in: language))")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
@@ -104,6 +105,6 @@ struct PokemonDetailView: View {
 
 #Preview {
     NavigationStack {
-        PokemonDetailView(pokemon: DexModelContainer.previewPokemon)
+        PokemonDetailView(pokemon: DexModelContainer.previewPokemon, language: .fr)
     }
 }
