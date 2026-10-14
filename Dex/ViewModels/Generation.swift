@@ -1,0 +1,40 @@
+//
+//  Generation.swift
+//  Dex
+//
+//  Created by Olivier Sbg on 14/10/2026.
+//
+
+import SwiftUI
+
+struct Generation: Identifiable {
+    let id: String
+    
+    let firstPokemon: Int
+    let lastPokemon: Int
+    
+    @State var isExpanded: Bool = false
+    
+    var name: String {
+        "Generation \(id)"
+    }
+    
+    static var allPokemons: Int {
+        allGens.last!.lastPokemon
+    }
+    
+    static let allGens = [
+        Generation(id: "I", firstPokemon: 1, lastPokemon: 151),
+        Generation(id: "II", firstPokemon: 152, lastPokemon: 251),
+        Generation(id: "III", firstPokemon: 252, lastPokemon: 386),
+        Generation(id: "IV", firstPokemon: 387, lastPokemon: 493),
+        Generation(id: "V", firstPokemon: 494, lastPokemon: 649),
+        Generation(id: "VI", firstPokemon: 650, lastPokemon: 721),
+        Generation(id: "VII", firstPokemon: 722, lastPokemon: 809),
+        Generation(id: "VIII", firstPokemon: 810, lastPokemon: 905),
+        Generation(id: "IX", firstPokemon: 906, lastPokemon: 1025),
+//        Generation(id: "X", firstPokemon: 1026, lastPokemon: 1028),
+        
+    ]
+}
+

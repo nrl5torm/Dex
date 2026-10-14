@@ -15,8 +15,6 @@ struct MainView: View {
     @Query(sort: \Pokemon.id, animation: .default)
     private var pokedex: [Pokemon]
     
-    let NbPokemons = 1025
-    
     @State private var searchText = ""
     @State private var filterByFavorites = false
     @State private var deepLinkedPokemon: Pokemon?
@@ -56,66 +54,20 @@ struct MainView: View {
     
             NavigationStack {
                 List {
-                    Section {
-                        ForEach((try? pokedex.filter(dynamicPredicate)) ?? pokedex) { pokemon in
-                            NavigationLink(value: pokemon) {
-                                if pokemon.sprite == nil {
-                                    AsyncImage(url: pokemon.spriteURL) { image in
-                                        image
-                                            .resizable()
-                                            .scaledToFit()
-                                    } placeholder: {
-                                        ProgressView()
-                                    }
-                                    .frame(width: 100, height: 100)
-                                } else {
-                                    pokemon.spriteView
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 100, height: 100)
-                                }
-                                
-                                VStack(alignment: .leading) {
-                                    HStack {
-                                        Text(pokemon.localizedName(in: selectedLanguage))
-                                            .fontWeight(.bold)
-                                        
-                                        if pokemon.favorite {
-                                            Image(systemName: "star.fill")
-                                                .foregroundStyle(.yellow)
-                                        }
-                                    }
-                                    HStack {
-                                        ForEach(pokemon.types, id: \.self) { type in
-                                            Text(type.capitalized)
-                                                .font(.subheadline)
-                                                .fontWeight(.semibold)
-                                                .foregroundStyle(.black)
-                                                .shadow(color: .white, radius: 1)
-                                                .padding(.horizontal, 13)
-                                                .padding(.vertical, 5)
-                                                .background(Color(type.capitalized))
-                                                .clipShape(.capsule)
-                                        }
-                                    }
-                                }
-                            }
-                            .swipeActions(edge: .leading) {
-                                Button(pokemon.favorite ? "Unfavorite" : "Favorite", systemImage: "star") {
-                                    pokemon.favorite.toggle()
-                                    do {
-                                        try modelContext.save()
-                                    } catch {
-                                        print(error)
-                                    }
-                                }
-                                .tint(pokemon.favorite ? .gray : .yellow)
-                            }
+                    let pokemons = (try? pokedex.filter(dynamicPredicate)) ?? pokedex
+
+                    ForEach(Generation.allGens) { generation in
+                        if pokemons.last!.id >= generation.firstPokemon {
+                            GenSectionView(generation: generation,
+                                           pokemons: pokemons,
+                                           language: selectedLanguage)
                         }
-                    } header: {
-//                        Text("Generation I") TODO
-                    } footer: {
-                        if fetching {
+                    }
+                    
+                    if fetching {
+                        Section {
+                            EmptyView()
+                        } footer: {
                             HStack() {
                                 Spacer()
                                 ProgressView()
@@ -123,8 +75,11 @@ struct MainView: View {
                                 Spacer()
                             }
                             .padding()
-                            
-                        } else if pokedex.count < NbPokemons {
+                        }
+                    } else if pokedex.count < Generation.allPokemons {
+                        Section {
+                            EmptyView()
+                        } footer: {
                             ContentUnavailableView {
                                 Label("Missing Pokémons", image: .nopokemon)
                             } description: {
@@ -135,10 +90,11 @@ struct MainView: View {
                                 }
                                 .buttonStyle(.borderedProminent)
                             }
-
+                            
                         }
                     }
                 }
+                .listStyle(.sidebar)
                 .navigationTitle("Pokédex")
                 .searchable(text: $searchText, prompt: "Find a Pokémon")
                 .animation(.default, value: searchText)
@@ -178,7 +134,7 @@ struct MainView: View {
                 }
             }
             .task {
-                if pokedex.count == NbPokemons {
+                if pokedex.count == Generation.allPokemons {
                     downloadSprites()
                 }
             }.onOpenURL { url in
@@ -191,6 +147,7 @@ struct MainView: View {
                 }) else {
                     return
                 }
+                
                 // will navigate to pokemon detail view
                 deepLinkedPokemon = pokémon
             }
@@ -201,11 +158,12 @@ struct MainView: View {
         fetching = true
         
         Task {
-            for id in startId...NbPokemons {
+            for id in startId...Generation.allPokemons {
                 do {
                     let fetched = try await fetcher.fetchPokemon(id: id)
                     let species = try await fetcher.fetchSpecies(id: id)
                     
+                    fetched.name = species.name(in: .defaultEN) ?? fetched.name
                     fetched.nameFR = species.name(in: .fr)
                     fetched.nameJAhk = species.name(in: .jaHrkt)
                     fetched.nameJAro = species.name(in: .jaRoma)
@@ -233,7 +191,7 @@ struct MainView: View {
             }
             
             let nbPokemonsMissingSprites = pokemonsMissingSprites.count
-            print("Sprites for \(NbPokemons - nbPokemonsMissingSprites) pokémons already downloaded.")
+            print("Sprites for \(Generation.allPokemons - nbPokemonsMissingSprites) pokémons already downloaded.")
             
             do {
                 for pokemon in pokemonsMissingSprites {
