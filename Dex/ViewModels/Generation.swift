@@ -22,7 +22,11 @@ struct Generation: Identifiable {
 
 enum Generations {
     static var lastPokemon: Int {
-        all.last!.lastPokemon
+        if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
+            25
+        } else {
+            all.last!.lastPokemon
+        }
     }
     
     static let all = [

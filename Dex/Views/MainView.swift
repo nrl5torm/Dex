@@ -42,7 +42,7 @@ struct MainView: View {
             ContentUnavailableView {
                 Label("No Pokémon", image: .nopokemon)
             } description: {
-                Text("There aren't any Pokémon yet.\n Fetch them to get started:")
+                Text("There aren't any Pokémon yet.\nFetch them to get started:")
             } actions: {
                 Button("Fetch Pokémon", systemImage: "arrow.down.circle") {
                     getPokemons(from: 1)
@@ -53,7 +53,9 @@ struct MainView: View {
         } else {
             let filteredPokemons = (try? pokedex.filter(dynamicPredicate)) ?? pokedex
             let visibleGenerations = Generations.all.filter { generation in
-                !filteredPokemons.isEmpty && filteredPokemons.last!.id >= generation.firstPokemon
+                filteredPokemons.contains { pokemon in
+                    pokemon.id >= generation.firstPokemon && pokemon.id <= generation.lastPokemon
+                }
             }
             
             NavigationStack {
@@ -68,14 +70,26 @@ struct MainView: View {
                                        language: selectedLanguage)
                     }
                     
-                    if !searchText.isEmpty && filteredPokemons.isEmpty {
-                        Section {
-                            EmptyView()
-                        } footer: {
-                            ContentUnavailableView {
-                                Label("No matches", image: .nopokemon)
-                            } description: {
-                                Text("No Pokémon matched your search \"\(searchText)\". Try again?")
+                    if filteredPokemons.isEmpty {
+                        if !searchText.isEmpty {
+                            Section {
+                                EmptyView()
+                            } footer: {
+                                ContentUnavailableView {
+                                    Label("No matches", image: .nopokemon)
+                                } description: {
+                                    Text("No \(filterByFavorites ? "favorite ":"")Pokémon matched your search \"\(searchText)\". Try again?")
+                                }
+                            }
+                        } else {
+                            Section {
+                                EmptyView()
+                            } footer: {
+                                ContentUnavailableView {
+                                    Label("No favorites", image: .nopokemon)
+                                } description: {
+                                    Text("You have no favorite Pokémon yet :-(")
+                                }
                             }
                         }
                     } else if fetching {
@@ -97,9 +111,9 @@ struct MainView: View {
                             ContentUnavailableView {
                                 Label("Missing Pokémon", image: .nopokemon)
                             } description: {
-                                Text("The fetch was interrupted!\n Fetch the remaining Pokémon:")
+                                Text("The fetch was interrupted!")
                             } actions: {
-                                Button("Fetch Pokémon", systemImage: "arrow.down.circle") {
+                                Button("Fetch more Pokémon", systemImage: "arrow.down.circle") {
                                     getPokemons(from: pokedex.count + 1)
                                 }
                                 .buttonStyle(.borderedProminent)
