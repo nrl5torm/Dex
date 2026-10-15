@@ -40,31 +40,45 @@ struct MainView: View {
         if pokedex.isEmpty {
             
             ContentUnavailableView {
-                Label("No Pokémons", image: .nopokemon)
+                Label("No Pokémon", image: .nopokemon)
             } description: {
-                Text("There aren't any Pokémons yet.\n Fetch them to get started:")
+                Text("There aren't any Pokémon yet.\n Fetch them to get started:")
             } actions: {
-                Button("Fetch Pokémons", systemImage: "arrow.down.circle") {
+                Button("Fetch Pokémon", systemImage: "arrow.down.circle") {
                     getPokemons(from: 1)
                 }
                 .buttonStyle(.borderedProminent)
             }
             
         } else {
-    
+            let filteredPokemons = (try? pokedex.filter(dynamicPredicate)) ?? pokedex
+            let visibleGenerations = Generations.all.filter { generation in
+                !filteredPokemons.isEmpty && filteredPokemons.last!.id >= generation.firstPokemon
+            }
+            
             NavigationStack {
                 List {
-                    let pokemons = (try? pokedex.filter(dynamicPredicate)) ?? pokedex
-
-                    ForEach(Generation.allGens) { generation in
-                        if pokemons.last!.id >= generation.firstPokemon {
-                            GenSectionView(generation: generation,
-                                           pokemons: pokemons,
-                                           language: selectedLanguage)
+                    ForEach(visibleGenerations) { generation in
+                        let generationPokemons = filteredPokemons.filter { pokemon in
+                            pokemon.id >= generation.firstPokemon && pokemon.id <= generation.lastPokemon
                         }
+                        
+                        GenSectionView(generation: generation,
+                                       pokemons: generationPokemons,
+                                       language: selectedLanguage)
                     }
                     
-                    if fetching {
+                    if !searchText.isEmpty && filteredPokemons.isEmpty {
+                        Section {
+                            EmptyView()
+                        } footer: {
+                            ContentUnavailableView {
+                                Label("No matches", image: .nopokemon)
+                            } description: {
+                                Text("No Pokémon matched your search \"\(searchText)\". Try again?")
+                            }
+                        }
+                    } else if fetching {
                         Section {
                             EmptyView()
                         } footer: {
@@ -76,21 +90,20 @@ struct MainView: View {
                             }
                             .padding()
                         }
-                    } else if pokedex.count < Generation.allPokemons {
+                    } else if pokedex.count < Generations.lastPokemon {
                         Section {
                             EmptyView()
                         } footer: {
                             ContentUnavailableView {
-                                Label("Missing Pokémons", image: .nopokemon)
+                                Label("Missing Pokémon", image: .nopokemon)
                             } description: {
-                                Text("The fetch was interrupted!\n Fetch the rest of the Pokémons:")
+                                Text("The fetch was interrupted!\n Fetch the remaining Pokémon:")
                             } actions: {
-                                Button("Fetch Pokémons", systemImage: "arrow.down.circle") {
+                                Button("Fetch Pokémon", systemImage: "arrow.down.circle") {
                                     getPokemons(from: pokedex.count + 1)
                                 }
                                 .buttonStyle(.borderedProminent)
                             }
-                            
                         }
                     }
                 }
@@ -134,8 +147,8 @@ struct MainView: View {
                 }
             }
             .task {
-                if pokedex.count == Generation.allPokemons {
-                    downloadSprites()
+                if pokedex.count == Generations.lastPokemon {
+                    await downloadSprites()
                 }
             }.onOpenURL { url in
                 guard url.scheme == "Dex" else { return }
@@ -158,7 +171,7 @@ struct MainView: View {
         fetching = true
         
         Task {
-            for id in startId...Generation.allPokemons {
+            for id in startId...Generations.lastPokemon {
                 do {
                     let fetched = try await fetcher.fetchPokemon(id: id)
                     let species = try await fetcher.fetchSpecies(id: id)
@@ -176,42 +189,39 @@ struct MainView: View {
             
             fetching = false
             
-            downloadSprites()
+            await downloadSprites()
         }
     }
     
-    private func downloadSprites() {
-        Task {
-            
-            guard let pokemonsMissingSprites = try? pokedex.filter(#Predicate<Pokemon> { pokemon in
-                pokemon.sprite == nil || pokemon.shiny == nil
-            }) else {
-                print("Predicate for pokémons missing sprites failed.")
-                return
-            }
-            
-            let nbPokemonsMissingSprites = pokemonsMissingSprites.count
-            print("Sprites for \(Generation.allPokemons - nbPokemonsMissingSprites) pokémons already downloaded.")
-            
-            do {
-                for pokemon in pokemonsMissingSprites {
-                    if pokemon.sprite == nil {
-                        let (sprite, _) = try await URLSession.shared.data(from: pokemon.spriteURL)
-                        pokemon.sprite = sprite
-                    }
-                    
-                    if pokemon.shiny == nil {
-                        let (shiny, _) = try await URLSession.shared.data(from: pokemon.shinyURL)
-                        pokemon.shiny = shiny
-                    }
-                    
-                    try modelContext.save()
+    private func downloadSprites() async {
+        guard let pokemonsMissingSprites = try? pokedex.filter(#Predicate<Pokemon> { pokemon in
+            pokemon.sprite == nil || pokemon.shiny ==  nil
+        }) else {
+            print("Predicate for missing-sprites pokémons failed.")
+            return
+        }
+        
+        let nbPokemonsMissingSprites = pokemonsMissingSprites.count
+        print("Sprites for \(Generations.lastPokemon - nbPokemonsMissingSprites) pokémons already downloaded.")
+        
+        do {
+            for pokemon in pokemonsMissingSprites {
+                if pokemon.sprite == nil {
+                    let (sprite, _) = try await URLSession.shared.data(from: pokemon.spriteURL)
+                    pokemon.sprite = sprite
                 }
-            
-                print("Downloaded sprites for \(nbPokemonsMissingSprites) remaining pokémons.")
-            } catch {
-                print(error)
+                
+                if pokemon.shiny == nil {
+                    let (shiny, _) = try await URLSession.shared.data(from: pokemon.shinyURL)
+                    pokemon.shiny = shiny
+                }
+                
+                try modelContext.save()
             }
+            
+            print("Downloaded sprites for \(nbPokemonsMissingSprites) remaining pokémons.")
+        } catch {
+            print(error)
         }
     }
 }
