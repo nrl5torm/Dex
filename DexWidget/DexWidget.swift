@@ -51,7 +51,7 @@ struct DexWidgetEntryView : View {
                     Text(entry.name.capitalized)
                         .fontWeight(.bold)
                         .font(.title3)
-                        .lineLimit(1)
+                        .lineLimit(2)
                         .minimumScaleFactor(0.5)
                         .shadow(color: .white, radius: 5)
                 }
@@ -60,12 +60,14 @@ struct DexWidgetEntryView : View {
         case .systemMedium:
             HStack {
                 pokemonImage
+                    .layoutPriority(1)
                 
                 VStack(alignment: .leading) {
                     Text(entry.name.capitalized)
                         .font(.title)
                         .bold()
                         .shadow(color: .white, radius: 2)
+                        .lineLimit(2)
                         .minimumScaleFactor(0.5)
                         .padding(.vertical, 1)
                     
@@ -90,7 +92,7 @@ struct DexWidgetEntryView : View {
                         .font(.largeTitle)
                         .bold()
                         .shadow(color: .white, radius: 2)
-                        .lineLimit(1)
+                        .lineLimit(2)
                         .minimumScaleFactor(0.5)
                     
                     Spacer()

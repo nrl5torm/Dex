@@ -90,7 +90,7 @@ struct PokemonDetailView: View {
             .padding(.bottom)
             
             VStack(alignment: .leading) {
-                Text("Translations:")
+                Text("Name translations:")
                     .font(.title2)
                     .fontWeight(.medium)
                     .padding(.bottom, 5)
@@ -99,6 +99,7 @@ struct PokemonDetailView: View {
                     HStack {
                         Text("\(language.flag) \(pokemon.localizedName(in: language))")
                             .font(.title3)
+                            .textSelection(.enabled)
                         Spacer()
                     }
                 }
