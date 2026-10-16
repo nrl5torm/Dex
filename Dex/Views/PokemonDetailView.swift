@@ -95,13 +95,16 @@ struct PokemonDetailView: View {
                     .fontWeight(.medium)
                     .padding(.bottom, 5)
                 
-                ForEach(DexLanguageCode.supportedLanguages) { language in
-                    HStack {
-                        Text("\(language.flag) \(pokemon.localizedName(in: language))")
-                            .font(.title3)
-                            .textSelection(.enabled)
-                        Spacer()
+                HStack {
+                    let names = DexLanguageCode.supportedLanguages.map { language in
+                        "\(language.flag) \(pokemon.localizedName(in: language))"
                     }
+                        .joined(separator: "\n")
+                    
+                    Text(names)
+                        .font(.title3)
+                        .textSelection(.enabled)
+                    Spacer()
                 }
             }
             .padding(.horizontal)
