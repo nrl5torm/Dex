@@ -27,8 +27,7 @@ struct PokemonDetailView: View {
                     AsyncImage(url: showShiny ? pokemon.shinyURL : pokemon.spriteURL) { image in
                         image
                             .interpolation(.none)
-                            .resizable()
-                            .scaledToFit()
+                            .scaleEffect(2)
                             .padding(.top, 180)
                             .padding(.horizontal, 40)
                             .shadow(color: .black, radius: 6)
@@ -37,10 +36,11 @@ struct PokemonDetailView: View {
                             .scaleEffect(8)
                     }
                 } else {
-                    (showShiny ? pokemon.shinyView : pokemon.spriteView)
+                    let image = showShiny ? pokemon.shinyView : pokemon.spriteView
+                    
+                    image
                         .interpolation(.none)
-                        .resizable()
-                        .scaledToFit()
+                        .scaleEffect(2)
                         .padding(.top, 180)
                         .padding(.horizontal, 40)
                         .shadow(color: .black, radius: 6)
