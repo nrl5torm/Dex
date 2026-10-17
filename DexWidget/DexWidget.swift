@@ -59,7 +59,11 @@ struct DexWidgetEntryView : View {
             
         case .systemMedium:
             HStack {
-                pokemonImage
+                entry.sprite
+                    .interpolation(.none)
+                    .scaleEffect(2)
+                    .shadow(color: .black, radius: 6)
+                    .frame(width: 140)
                     .layoutPriority(1)
                 
                 VStack(alignment: .leading) {
@@ -80,7 +84,7 @@ struct DexWidgetEntryView : View {
                 }
                 .layoutPriority(1)
                 
-                Spacer()
+                Spacer(minLength: 0)
             }
             
         default:

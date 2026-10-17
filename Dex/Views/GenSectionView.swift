@@ -76,7 +76,7 @@ struct GenSectionView: View {
             }
         }, header: {
             Text(generation.name)
-                .font(.title3)
+                .font(.title2)
         })
     }
 }

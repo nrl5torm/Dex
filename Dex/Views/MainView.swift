@@ -98,8 +98,16 @@ struct MainView: View {
                         } footer: {
                             HStack() {
                                 Spacer()
-                                ProgressView()
-                                    .scaleEffect(4)
+                                VStack {
+                                    Text("Fetching Pokémon...")
+                                        .font(.title3)
+                                        .fontWeight(.semibold)
+                                        .padding(.top, -30)
+                                        .padding(.bottom, 30)
+                                    
+                                    ProgressView()
+                                        .scaleEffect(4)
+                                }
                                 Spacer()
                             }
                             .padding()

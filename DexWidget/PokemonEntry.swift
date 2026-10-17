@@ -41,7 +41,7 @@ struct PokemonEntry: TimelineEntry {
     static var entry3: PokemonEntry {
         PokemonEntry(date: .now,
                      id: 6,
-                     name: "charizard veryveryverylongname",
+                     name: "charizard",
                      types: ["fire", "flying"],
                      hp: 78,
                      sprite: Image(.charizard)
