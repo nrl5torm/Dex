@@ -59,7 +59,9 @@ struct DexTimelineProvider: TimelineProvider {
                 name: pokemon.localizedName(in: DexLanguageCode.userLanguage),
                 types: pokemon.types,
                 hp: pokemon.hp,
-                sprite: pokemon.spriteView)
+                sprite: pokemon.spriteView,
+                generation: pokemon.generation,
+                favorite: pokemon.favorite)
             )
         }
         

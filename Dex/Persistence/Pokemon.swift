@@ -20,6 +20,7 @@ final class Pokemon: Decodable {
     var nameJAro: String?
     var nameJAhk: String?
     
+    var generation: String?
     var types: [String]
     
     var hp: Int

@@ -44,4 +44,10 @@ enum Generations {
         
         // Generation(id: "X", firstPokemon: 1026, lastPokemon: ),
     ]
+    
+    static func genName(for pokemon: Pokemon) -> String? {
+        Generations.all.first(where: { generation in
+            pokemon.id >= generation.firstPokemon && pokemon.id <= generation.lastPokemon
+        })?.name
+    }
 }

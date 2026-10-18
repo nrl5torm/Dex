@@ -20,6 +20,7 @@ struct GenSectionView: View {
         Section(isExpanded: $isExpanded, content: {
             
             ForEach(pokemons) { pokemon in
+                    
                 NavigationLink(value: pokemon) {
                     if pokemon.sprite == nil {
                         AsyncImage(url: pokemon.spriteURL) { image in

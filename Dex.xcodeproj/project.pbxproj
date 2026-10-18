@@ -54,8 +54,8 @@
 			membershipExceptions = (
 				Assets.xcassets,
 				Persistence/DexModelContainer.swift,
+				Persistence/Pokemon.swift,
 				ViewModels/DexLanguageCode.swift,
-				ViewModels/Pokemon.swift,
 				ViewModels/Stat.swift,
 			);
 			target = C533CDE93073E48600A2AC84 /* DexWidgetExtension */;

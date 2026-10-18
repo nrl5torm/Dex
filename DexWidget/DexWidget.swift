@@ -18,7 +18,7 @@ struct DexWidgetEntryView : View {
             .interpolation(.none)
             .resizable()
             .scaledToFit()
-            .shadow(color: .black, radius: 6)
+            .shadow(radius: 3)
     }
     
     var typesView: some View {
@@ -26,6 +26,9 @@ struct DexWidgetEntryView : View {
             Text(type.capitalized)
                 .font(.subheadline)
                 .fontWeight(.semibold)
+                .foregroundStyle(.background)
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
                 .padding(.horizontal, 13)
                 .padding(.vertical, 5)
                 .background(Color(type.capitalized))
@@ -37,6 +40,29 @@ struct DexWidgetEntryView : View {
     var hpView: some View {
         Text("HP \(entry.hp)")
             .fontWeight(.semibold)
+            .foregroundStyle(.background)
+            .shadow(color: .primary, radius: 1)
+    }
+    
+    var generationView: some View? {
+        if let gen = entry.generation {
+            Text(gen)
+                .font(.caption)
+                .foregroundStyle(.background)
+                .shadow(color: .primary, radius: 1)
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
+        } else {
+            nil
+        }
+    }
+    
+    var favView: some View? {
+        entry.favorite ?
+            Image(systemName: "star.fill")
+                .foregroundStyle(.yellow)
+                .shadow(color: .primary, radius: 3)
+        : nil
     }
     
     var body: some View {
@@ -48,12 +74,17 @@ struct DexWidgetEntryView : View {
                 VStack {
                     Spacer()
                     
-                    Text(entry.name.capitalized)
-                        .fontWeight(.bold)
-                        .font(.title3)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.5)
-                        .shadow(color: .white, radius: 5)
+                    HStack {
+                        Text(entry.name.capitalized)
+                            .fontWeight(.bold)
+                            .foregroundStyle(.background)
+                            .font(.title3)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.5)
+                            .shadow(color: .primary, radius: 5)
+                        
+                        favView
+                    }
                 }
             }
             
@@ -64,27 +95,34 @@ struct DexWidgetEntryView : View {
                     .scaleEffect(2)
                     .shadow(color: .black, radius: 6)
                     .frame(width: 140)
+                    .padding(.leading, 10)
                     .layoutPriority(1)
                 
                 VStack(alignment: .leading) {
-                    Text(entry.name.capitalized)
-                        .font(.title)
-                        .bold()
-                        .shadow(color: .white, radius: 2)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.5)
-                        .padding(.vertical, 1)
+                    HStack {
+                        Text(entry.name.capitalized)
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundStyle(.background)
+                            .shadow(color: .primary, radius: 2)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.5)
+                            .padding(.vertical, 1)
+                        
+                        favView
+                    }
                     
                     HStack {
                         typesView
                     }
                     
                     hpView
-                        .padding(1)
+                        .padding(.top, 2)
+                    generationView
                 }
                 .layoutPriority(1)
                 
-                Spacer(minLength: 0)
+                Spacer()
             }
             
         default:
@@ -92,20 +130,26 @@ struct DexWidgetEntryView : View {
                 pokemonImage
                 
                 VStack(alignment: .leading) {
-                    Text(entry.name.capitalized)
-                        .font(.largeTitle)
-                        .bold()
-                        .shadow(color: .white, radius: 2)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.5)
+                    HStack {
+                        Text(entry.name.capitalized)
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundStyle(.background)
+                            .shadow(color: .primary, radius: 2)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.5)
+                        
+                        favView
+                    }
                     
                     Spacer()
                     
                     HStack {
-                        hpView
-                        
+                        VStack(alignment: .leading) {
+                            hpView
+                            generationView
+                        }
                         Spacer()
-                        
                         typesView
                     }
                 }

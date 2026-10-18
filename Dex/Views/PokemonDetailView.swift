@@ -14,8 +14,6 @@ struct PokemonDetailView: View {
     public var pokemon: Pokemon
     
     @State private var showShiny = false
-    @State private var isPortrait = true
-
     
     var body: some View {
         GeometryReader { geo in
@@ -25,19 +23,19 @@ struct PokemonDetailView: View {
                     pokemon.background
                         .resizable()
                         .scaledToFill()
-                        .frame(height: geo.size.height > geo.size.width ? 400 : 250, alignment: .bottom)
+                        .frame(height: geo.size.height > geo.size.width ? 380 : 250, alignment: .bottom)
                         .clipped()
                         .ignoresSafeArea()
                     
                     if pokemon.sprite == nil || pokemon.shiny == nil {
                         let imageUrl = showShiny ? pokemon.shinyURL : pokemon.spriteURL
-                        
                         AsyncImage(url: imageUrl) { image in
                             image.scaledView
                         } placeholder: {
                             ProgressView()
                                 .scaleEffect(8)
                         }
+                        
                     } else {
                         let imageView = showShiny ? pokemon.shinyView : pokemon.spriteView
                         imageView
@@ -46,6 +44,18 @@ struct PokemonDetailView: View {
                 }
                 
                 HStack {
+                    if let gen = pokemon.generation {
+                        Text(gen)
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                            .minimumScaleFactor(0.5)
+                            .lineLimit(1)
+                            .padding(7)
+                            .overlay(Capsule()
+                                .stroke(.gray, lineWidth: 1)
+                            )
+                    }
+                    
                     ForEach(pokemon.types, id: \.self) { type in
                         Text(type.capitalized)
                             .font(.title3)
@@ -88,7 +98,7 @@ struct PokemonDetailView: View {
                 .padding(.bottom)
                 
                 VStack(alignment: .leading) {
-                    Text("Name translations:")
+                    Text("Names:")
                         .font(.title2)
                         .fontWeight(.medium)
                         .padding(.bottom, 5)

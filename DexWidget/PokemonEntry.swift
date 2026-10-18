@@ -8,7 +8,6 @@
 import WidgetKit
 import SwiftUI
 
-
 struct PokemonEntry: TimelineEntry {
     let date: Date
     
@@ -17,6 +16,8 @@ struct PokemonEntry: TimelineEntry {
     let types: [String]
     let hp: Int
     let sprite: Image
+    let generation: String?
+    let favorite: Bool
     
     static var entry1: PokemonEntry {
         PokemonEntry(date: .now,
@@ -24,7 +25,9 @@ struct PokemonEntry: TimelineEntry {
                      name: "bulbasaur",
                      types: ["grass", "poison"],
                      hp: 45,
-                     sprite: Image(.bulbasaur)
+                     sprite: Image(.bulbasaur),
+                     generation: "Generation I",
+                     favorite: true
         )
     }
     
@@ -34,7 +37,9 @@ struct PokemonEntry: TimelineEntry {
                      name: "mew",
                      types: ["psychic"],
                      hp: 100,
-                     sprite: Image(.mew)
+                     sprite: Image(.mew),
+                     generation: "Generation I",
+                     favorite: false
         )
     }
     
@@ -44,7 +49,9 @@ struct PokemonEntry: TimelineEntry {
                      name: "charizard",
                      types: ["fire", "flying"],
                      hp: 78,
-                     sprite: Image(.charizard)
+                     sprite: Image(.charizard),
+                     generation: "Generation I",
+                     favorite: false
         )
     }
 }

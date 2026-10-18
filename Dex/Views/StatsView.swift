@@ -36,6 +36,7 @@ struct StatsView: View {
         .chartYAxis {
             AxisMarks {
                 AxisValueLabel(anchor: .topLeading)
+                    .font(.callout)
             }
         }
     }

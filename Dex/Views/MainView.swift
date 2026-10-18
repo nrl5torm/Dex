@@ -78,7 +78,7 @@ struct MainView: View {
                                 ContentUnavailableView {
                                     Label("No matches", image: .nopokemon)
                                 } description: {
-                                    Text("No \(filterByFavorites ? "favorite ":"")Pokémon matched your search \"\(searchText)\". Try again?")
+                                    Text("Found no \(filterByFavorites ? "favorite ":"")Pokémon for the search term \"\(searchText)\". Try again?")
                                 }
                             }
                         } else {
@@ -170,7 +170,7 @@ struct MainView: View {
             }
             .task {
                 if pokedex.count == Generations.lastPokemon {
-                    await downloadSprites()
+                    await getMissingComplementaryData()
                 }
             }.onOpenURL { url in
                 guard url.scheme == "Dex" else { return }
@@ -203,6 +203,8 @@ struct MainView: View {
                     fetched.nameJAhk = species.name(in: .jaHrkt)
                     fetched.nameJAro = species.name(in: .jaRoma)
                     
+                    fetched.generation = Generations.genName(for: fetched)
+                    
                     modelContext.insert(fetched)
                 } catch {
                     print(error)
@@ -211,23 +213,21 @@ struct MainView: View {
             
             fetching = false
             
-            await downloadSprites()
+            await getMissingComplementaryData()
         }
     }
     
-    private func downloadSprites() async {
-        guard let pokemonsMissingSprites = try? pokedex.filter(#Predicate<Pokemon> { pokemon in
-            pokemon.sprite == nil || pokemon.shiny ==  nil
-        }) else {
-            print("Predicate for missing-sprites pokémons failed.")
+    private func getMissingComplementaryData() async {
+        let pokemonsMissingData = pokedex.filter({ pokemon in
+            pokemon.sprite == nil || pokemon.shiny == nil || pokemon.generation == nil
+        })
+        guard pokemonsMissingData.count > 0 else {
             return
         }
-        
-        let nbPokemonsMissingSprites = pokemonsMissingSprites.count
-        print("Sprites for \(Generations.lastPokemon - nbPokemonsMissingSprites) pokémons already downloaded.")
-        
+        print("Adding data to \(pokemonsMissingData.count) more pokémons...")
+
         do {
-            for pokemon in pokemonsMissingSprites {
+            for pokemon in pokemonsMissingData {
                 if pokemon.sprite == nil {
                     let (sprite, _) = try await URLSession.shared.data(from: pokemon.spriteURL)
                     pokemon.sprite = sprite
@@ -238,10 +238,14 @@ struct MainView: View {
                     pokemon.shiny = shiny
                 }
                 
+                if pokemon.generation == nil {
+                    pokemon.generation = Generations.genName(for: pokemon)
+                }
+                
                 try modelContext.save()
             }
             
-            print("Downloaded sprites for \(nbPokemonsMissingSprites) remaining pokémons.")
+            print("Added data to \(pokemonsMissingData.count) more pokémons.")
         } catch {
             print(error)
         }
