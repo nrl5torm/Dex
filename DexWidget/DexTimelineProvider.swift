@@ -21,12 +21,13 @@ struct DexTimelineProvider: TimelineProvider {
     
     func getRandomPokemons(_ count: Int) -> [Pokemon] {
         var randomPokemons: [Pokemon] = []
+        var randomGenerator = SeededRandomGenerator(seedDate: Date.now)
         
         let context = ModelContext(modelContainer)
         if let pokedex = try? context.fetch(FetchDescriptor<Pokemon>()),
            !pokedex.isEmpty {
             for _ in 1...count {
-                randomPokemons.append(pokedex.randomElement()!)
+                randomPokemons.append(pokedex.randomElement(using: &randomGenerator)!)
             }
         } else {
             print("ERROR", "Could not fetch pokemons.", separator: ": ")

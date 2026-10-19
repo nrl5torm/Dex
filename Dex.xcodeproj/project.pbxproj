@@ -60,12 +60,20 @@
 			);
 			target = C533CDE93073E48600A2AC84 /* DexWidgetExtension */;
 		};
+		C53C694430863EB200B96A5A /* Exceptions for "DexWidget" folder in "Dex" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				SeededRandomGenerator.swift,
+			);
+			target = C5CB71A930643C91001C7C84 /* Dex */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		C533CDF03073E48600A2AC84 /* DexWidget */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				C53C694430863EB200B96A5A /* Exceptions for "DexWidget" folder in "Dex" target */,
 				C533CDFB3073E48800A2AC84 /* Exceptions for "DexWidget" folder in "DexWidgetExtension" target */,
 			);
 			path = DexWidget;

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 struct PokemonDetailView: View {
     @Environment(\.modelContext) private var modelContext
@@ -74,6 +75,9 @@ struct PokemonDetailView: View {
                         pokemon.favorite.toggle()
                         do {
                             try modelContext.save()
+                            
+                            // refresh widgets
+                            WidgetCenter.shared.reloadAllTimelines()
                         } catch {
                             print(error)
                         }
@@ -137,7 +141,7 @@ extension Image {
     var scaledView: some View {
         self.interpolation(.none)
             .scaleEffect(3)
-            .padding(.bottom, 70)
+            .padding(.bottom, 80)
             .padding(.leading, 50)
             .shadow(color: .black, radius: 6)
     }

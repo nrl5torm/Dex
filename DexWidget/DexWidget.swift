@@ -10,23 +10,32 @@ import SwiftUI
 
 struct DexWidgetEntryView : View {
     @Environment(\.widgetFamily) var widgetSize
+    @Environment(\.colorScheme) var colorScheme
     
     var entry: DexTimelineProvider.Entry
     
-    var pokemonImage: some View {
-        entry.sprite
-            .interpolation(.none)
-            .resizable()
-            .scaledToFit()
-            .shadow(radius: 3)
+    private var foreColor: Color {
+        colorScheme == .dark ? .black : .white
     }
     
-    var typesView: some View {
+    private var shadowColor: Color {
+        colorScheme == .light ? .black : .white
+    }
+    
+    private var pokemonImage: some View {
+        entry.sprite
+                .interpolation(.none)
+                .resizable()
+                .scaledToFit()
+                .shadow(color: shadowColor, radius: 6)
+    }
+    
+    private var typesView: some View {
         ForEach(entry.types, id: \.self) { type in
             Text(type.capitalized)
                 .font(.subheadline)
                 .fontWeight(.semibold)
-                .foregroundStyle(.background)
+                .foregroundStyle(foreColor)
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
                 .padding(.horizontal, 13)
@@ -37,19 +46,19 @@ struct DexWidgetEntryView : View {
         }
     }
     
-    var hpView: some View {
+    private var hpView: some View {
         Text("HP \(entry.hp)")
             .fontWeight(.semibold)
-            .foregroundStyle(.background)
-            .shadow(color: .primary, radius: 1)
+            .foregroundStyle(foreColor)
+            .shadow(color: shadowColor, radius: 2)
     }
     
-    var generationView: some View? {
+    private var generationView: some View? {
         if let gen = entry.generation {
             Text(gen)
                 .font(.caption)
-                .foregroundStyle(.background)
-                .shadow(color: .primary, radius: 1)
+                .foregroundStyle(foreColor)
+                .shadow(color: shadowColor, radius: 2)
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
         } else {
@@ -57,16 +66,17 @@ struct DexWidgetEntryView : View {
         }
     }
     
-    var favView: some View? {
+    private var favView: some View? {
         entry.favorite ?
             Image(systemName: "star.fill")
                 .foregroundStyle(.yellow)
-                .shadow(color: .primary, radius: 3)
+                .shadow(color: shadowColor, radius: 2)
         : nil
     }
     
     var body: some View {
         switch widgetSize {
+            
         case .systemSmall:
             ZStack() {
                 pokemonImage
@@ -77,11 +87,11 @@ struct DexWidgetEntryView : View {
                     HStack {
                         Text(entry.name.capitalized)
                             .fontWeight(.bold)
-                            .foregroundStyle(.background)
+                            .foregroundStyle(foreColor)
                             .font(.title3)
                             .lineLimit(2)
                             .minimumScaleFactor(0.5)
-                            .shadow(color: .primary, radius: 5)
+                            .shadow(color: shadowColor, radius: 2)
                         
                         favView
                     }
@@ -93,7 +103,7 @@ struct DexWidgetEntryView : View {
                 entry.sprite
                     .interpolation(.none)
                     .scaleEffect(2)
-                    .shadow(color: .black, radius: 6)
+                    .shadow(color: shadowColor, radius: 6)
                     .frame(width: 140)
                     .padding(.leading, 10)
                     .layoutPriority(1)
@@ -103,11 +113,11 @@ struct DexWidgetEntryView : View {
                         Text(entry.name.capitalized)
                             .font(.title)
                             .fontWeight(.bold)
-                            .foregroundStyle(.background)
-                            .shadow(color: .primary, radius: 2)
+                            .foregroundStyle(foreColor)
+                            .shadow(color: shadowColor, radius: 2)
                             .lineLimit(2)
                             .minimumScaleFactor(0.5)
-                            .padding(.vertical, 1)
+                            .layoutPriority(1)
                         
                         favView
                     }
@@ -115,9 +125,10 @@ struct DexWidgetEntryView : View {
                     HStack {
                         typesView
                     }
+                    .padding(.top, -5)
+                    .padding(.bottom, 5)
                     
                     hpView
-                        .padding(.top, 2)
                     generationView
                 }
                 .layoutPriority(1)
@@ -134,8 +145,8 @@ struct DexWidgetEntryView : View {
                         Text(entry.name.capitalized)
                             .font(.largeTitle)
                             .fontWeight(.bold)
-                            .foregroundStyle(.background)
-                            .shadow(color: .primary, radius: 2)
+                            .foregroundStyle(foreColor)
+                            .shadow(color: shadowColor, radius: 2)
                             .lineLimit(2)
                             .minimumScaleFactor(0.5)
                         
@@ -149,6 +160,7 @@ struct DexWidgetEntryView : View {
                             hpView
                             generationView
                         }
+                        
                         Spacer()
                         typesView
                     }
@@ -164,8 +176,7 @@ struct DexWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: DexTimelineProvider()) { entry in
             DexWidgetEntryView(entry: entry)
-                .foregroundStyle(.black)
-                .containerBackground(Color(entry.types[0].capitalized), for: .widget)
+                .containerBackground(Color(entry.types[0].capitalized).opacity(0.8), for: .widget)
                 .widgetURL(URL(string: "Dex://showPokemon/\(entry.id)"))
         }
         .configurationDisplayName("Pokémon")

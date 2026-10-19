@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 struct GenSectionView: View {
     @Environment(\.modelContext) private var modelContext
@@ -20,7 +21,6 @@ struct GenSectionView: View {
         Section(isExpanded: $isExpanded, content: {
             
             ForEach(pokemons) { pokemon in
-                    
                 NavigationLink(value: pokemon) {
                     if pokemon.sprite == nil {
                         AsyncImage(url: pokemon.spriteURL) { image in
@@ -68,6 +68,9 @@ struct GenSectionView: View {
                         pokemon.favorite.toggle()
                         do {
                             try modelContext.save()
+                            
+                            // refresh widgets
+                            WidgetCenter.shared.reloadAllTimelines()
                         } catch {
                             print(error)
                         }

@@ -51,7 +51,7 @@ struct PokemonEntry: TimelineEntry {
                      hp: 78,
                      sprite: Image(.charizard),
                      generation: "Generation I",
-                     favorite: false
+                     favorite: true
         )
     }
 }

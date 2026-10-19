@@ -78,7 +78,7 @@ struct MainView: View {
                                 ContentUnavailableView {
                                     Label("No matches", image: .nopokemon)
                                 } description: {
-                                    Text("Found no \(filterByFavorites ? "favorite ":"")Pokémon for the search term \"\(searchText)\". Try again?")
+                                    Text("No \(filterByFavorites ? "favorite ":"")Pokémon found for the search term \"\(searchText)\". Try again?")
                                 }
                             }
                         } else {
@@ -148,6 +148,7 @@ struct MainView: View {
                                 }
                             }
                             .onChange(of: selectedLanguage) {
+                                // refresh widgets
                                 WidgetCenter.shared.reloadAllTimelines()
                             }
                         } label: {
