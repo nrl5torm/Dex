@@ -24,10 +24,10 @@ struct DexWidgetEntryView : View {
     
     private var pokemonImage: some View {
         entry.sprite
-                .interpolation(.none)
-                .resizable()
-                .scaledToFit()
-                .shadow(color: shadowColor, radius: 6)
+            .interpolation(.none)
+            .resizable()
+            .scaledToFit()
+            .shadow(color: shadowColor, radius: 6)
     }
     
     private var typesView: some View {
@@ -37,7 +37,7 @@ struct DexWidgetEntryView : View {
                 .fontWeight(.semibold)
                 .foregroundStyle(foreColor)
                 .lineLimit(1)
-                .minimumScaleFactor(0.5)
+                .minimumScaleFactor(0.8)
                 .padding(.horizontal, 13)
                 .padding(.vertical, 5)
                 .background(Color(type.capitalized))
@@ -59,19 +59,10 @@ struct DexWidgetEntryView : View {
                 .font(.caption)
                 .foregroundStyle(foreColor)
                 .shadow(color: shadowColor, radius: 2)
-                .minimumScaleFactor(0.5)
                 .lineLimit(1)
         } else {
             nil
         }
-    }
-    
-    private var favView: some View? {
-        entry.favorite ?
-            Image(systemName: "star.fill")
-                .foregroundStyle(.yellow)
-                .shadow(color: shadowColor, radius: 2)
-        : nil
     }
     
     var body: some View {
@@ -84,17 +75,13 @@ struct DexWidgetEntryView : View {
                 VStack {
                     Spacer()
                     
-                    HStack {
-                        Text(entry.name.capitalized)
-                            .fontWeight(.bold)
-                            .foregroundStyle(foreColor)
-                            .font(.title3)
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.5)
-                            .shadow(color: shadowColor, radius: 2)
-                        
-                        favView
-                    }
+                    Text(entry.title)
+                        .fontWeight(.bold)
+                        .foregroundStyle(foreColor)
+                        .font(.title3)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.5)
+                        .shadow(color: shadowColor, radius: 2)
                 }
             }
             
@@ -109,18 +96,14 @@ struct DexWidgetEntryView : View {
                     .layoutPriority(1)
                 
                 VStack(alignment: .leading) {
-                    HStack {
-                        Text(entry.name.capitalized)
-                            .font(.title)
-                            .fontWeight(.bold)
-                            .foregroundStyle(foreColor)
-                            .shadow(color: shadowColor, radius: 2)
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.5)
-                            .layoutPriority(1)
-                        
-                        favView
-                    }
+                    Text(entry.title)
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .foregroundStyle(foreColor)
+                        .shadow(color: shadowColor, radius: 2)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.5)
+                        .layoutPriority(1)
                     
                     HStack {
                         typesView
@@ -141,17 +124,13 @@ struct DexWidgetEntryView : View {
                 pokemonImage
                 
                 VStack(alignment: .leading) {
-                    HStack {
-                        Text(entry.name.capitalized)
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .foregroundStyle(foreColor)
-                            .shadow(color: shadowColor, radius: 2)
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.5)
-                        
-                        favView
-                    }
+                    Text(entry.title)
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundStyle(foreColor)
+                        .shadow(color: shadowColor, radius: 2)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
                     
                     Spacer()
                     

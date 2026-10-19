@@ -19,6 +19,10 @@ struct PokemonEntry: TimelineEntry {
     let generation: String?
     let favorite: Bool
     
+    var title: String {
+        "\(name.capitalized)\(favorite ? "⭐" : "")"
+    }
+    
     static var entry1: PokemonEntry {
         PokemonEntry(date: .now,
                      id: 1,

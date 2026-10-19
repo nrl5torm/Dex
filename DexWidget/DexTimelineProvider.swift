@@ -39,20 +39,19 @@ struct DexTimelineProvider: TimelineProvider {
     
     func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
         var entries: [PokemonEntry] = []
-        let currentDate = Date()
+        let currentDate = Date.now
         
-        let nbEntries = 20
+        let nbEntries = 10
         let freqInSec = 15
-        let nbPokemons = 5
-        let randomPokemons = getRandomPokemons(nbPokemons)
+        let randomPokemons = getRandomPokemons(nbEntries)
         
         for i in 0 ..< nbEntries {
             let entryDate = Calendar.current.date(
                 byAdding: .second,
                 value: i * freqInSec,
-                to: currentDate) ?? Date.now
+                to: currentDate) ?? currentDate
             
-            let pokemon = randomPokemons[i % nbPokemons]
+            let pokemon = randomPokemons[i]
             
             entries.append(PokemonEntry(
                 date: entryDate,
