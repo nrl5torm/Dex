@@ -11,8 +11,8 @@ struct SeededRandomGenerator: RandomNumberGenerator {
     private var state: UInt64
     
     init(seedDate: Date) {
-        // Convert date to hours since 2001 (get no more than one seed per hour)
-        let seed = UInt64(seedDate.timeIntervalSinceReferenceDate / 3600)
+        // Convert date to half-hours since 2001 (get no more than one seed every 30 min)
+        let seed = UInt64(seedDate.timeIntervalSinceReferenceDate / 1800)
         
         // Avoid a seed of 0 if using ciphers that break on 0;
         // LCGs handle 0 fine depending on the constants, but a fallback is safe.
