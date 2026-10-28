@@ -41,8 +41,6 @@ enum Generations {
         Generation(id: "VII", firstPokemon: 722, lastPokemon: 809),
         Generation(id: "VIII", firstPokemon: 810, lastPokemon: 905),
         Generation(id: "IX", firstPokemon: 906, lastPokemon: 1025),
-        
-        // Generation(id: "X", firstPokemon: 1026, lastPokemon: ),
     ]
     
     static func genName(for pokemon: Pokemon) -> String? {

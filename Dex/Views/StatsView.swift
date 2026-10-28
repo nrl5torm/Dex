@@ -14,17 +14,17 @@ struct StatsView: View {
     var body: some View {
         Chart(pokemon.stats) { stat in
             BarMark(x: .value("Value", stat.value),
-                    y: .value("Stat", stat.name)
+                    y: .value("Stat", stat.name),
+                    height: 10
             )
             .foregroundStyle(pokemon.typeColor)
             .annotation(position: .trailing) {
                 Text(String(stat.value))
                     .foregroundStyle(.secondary)
                     .fontWeight(.semibold)
-                    .padding(.top, -3)
             }
         }
-        .frame(height: 200)
+        .frame(height: 300)
         .chartXScale(domain: 0...pokemon.highestStat.value
                      + max(10, Int(Double(pokemon.highestStat.value) * 0.2)))
         .chartXAxis {

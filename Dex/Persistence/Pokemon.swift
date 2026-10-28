@@ -137,7 +137,7 @@ final class Pokemon: Decodable {
     }
     
     var searchKey: String {
-        "\(name) \(nameFR ?? "") \(nameJAro ?? "") \(String(id))"
+        "\(name) \(nameFR ?? "") \(nameJAro ?? "") \(String(id)) \(types.joined(separator: " ")) \(generation?.split(separator: " ")[1] ?? "")"
     }
     
     var spriteView: Image {
